@@ -1,0 +1,90 @@
+#cloud-config
+write_files:
+  - path: /etc/sysctl.d/90-mcn-frr.conf
+    permissions: '0644'
+    content: |
+      net.ipv4.ip_forward=1
+      net.ipv4.conf.all.rp_filter=2
+  - path: /usr/local/lib/mcn/bootstrap.sh
+    permissions: '0700'
+    content: |
+      ${indent(6, bootstrap_script)}
+  - path: /etc/systemd/system/mcn-frr-bootstrap.service
+    permissions: '0644'
+    content: |
+      [Unit]
+      Description=Install and configure regional FRR with bounded retries
+      After=network-online.target
+      Wants=network-online.target
+      [Service]
+      Type=oneshot
+      TimeoutStartSec=30min
+      ExecStart=/bin/bash /usr/local/lib/mcn/bootstrap.sh
+      RemainAfterExit=yes
+      [Install]
+      WantedBy=multi-user.target
+  - path: /usr/local/lib/mcn/vip_translation.py
+    permissions: '0700'
+    content: |
+      ${indent(6, vip_translation_script)}
+  - path: /etc/systemd/system/mcn-vip-translation.service
+    permissions: '0644'
+    content: |
+      [Unit]
+      Description=Converge Azure VIP translation from CE-learned BGP paths
+      After=frr.service
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/bin/python3 /usr/local/lib/mcn/vip_translation.py --vip ${vip} --router-ip ${router_ip} --ce-ips ${join(" ", ce_ips)}
+  - path: /etc/systemd/system/mcn-vip-translation.timer
+    permissions: '0644'
+    content: |
+      [Unit]
+      Description=Follow regional CE BGP failure and recovery
+      [Timer]
+      OnBootSec=15s
+      OnUnitActiveSec=3s
+      [Install]
+      WantedBy=timers.target
+  - path: /var/lib/mcn/frr.conf
+    owner: root:root
+    permissions: '0640'
+    content: |
+      frr defaults traditional
+      hostname mcn-frr
+      service integrated-vtysh-config
+      log syslog informational
+      ip prefix-list VIP seq 10 permit ${vip}/32
+      route-map CE-IN permit 10
+       match ip address prefix-list VIP
+      route-map RS-OUT permit 10
+       match ip address prefix-list VIP
+      route-map RS-IN deny 10
+      router bgp ${frr_asn}
+       bgp router-id ${router_ip}
+       no bgp default ipv4-unicast
+       neighbor CE peer-group
+       neighbor CE remote-as ${ce_asn}
+%{ for ip in ce_ips ~}
+       neighbor ${ip} peer-group CE
+%{ endfor ~}
+       neighbor RS peer-group
+       neighbor RS remote-as ${rs_asn}
+       neighbor RS ebgp-multihop 2
+%{ for ip in rs_peer_ips ~}
+       neighbor ${ip} peer-group RS
+%{ endfor ~}
+       address-family ipv4 unicast
+%{ for ip in ce_ips ~}
+        neighbor ${ip} activate
+        neighbor ${ip} route-map CE-IN in
+%{ endfor ~}
+%{ for ip in rs_peer_ips ~}
+        neighbor ${ip} activate
+        neighbor ${ip} route-map RS-IN in
+        neighbor ${ip} route-map RS-OUT out
+%{ endfor ~}
+       exit-address-family
+runcmd:
+  - [systemctl, daemon-reload]
+  - [systemctl, enable, --now, --no-block, mcn-frr-bootstrap.service]

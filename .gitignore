@@ -1,0 +1,9 @@
+.terraform/
+*.tfstate*
+*.tfplan
+*.tfvars
+*.tfvars.json
+backend.hcl
+__pycache__/
+docs/_data/
+!terraform/tests/test.auto.tfvars

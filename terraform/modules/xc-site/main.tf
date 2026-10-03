@@ -1,0 +1,322 @@
+# Hardware is read by static site name so it cannot defer approval count or
+# create a site/VM dependency cycle. The configured phase is a separate plan.
+data "xcsh_site_registrations_by_site" "hardware" {
+  count     = var.bind_registered_interfaces ? 1 : 0
+  namespace = "system"
+  site_name = var.site_name
+}
+
+locals {
+  role_macs = {
+    slo      = lower(replace(coalesce(var.mgmt_nic_mac, "unbound"), "-", ":"))
+    sli      = lower(replace(coalesce(var.inside_nic_mac, "unbound"), "-", ":"))
+    external = lower(replace(coalesce(var.external_nic_mac, "unbound"), "-", ":"))
+  }
+  registration_records = var.bind_registered_interfaces ? [
+    for item in coalesce(try(data.xcsh_site_registrations_by_site.hardware[0].items, null), []) : {
+      site     = coalesce(try(item.get_spec.passport.cluster_name, null), "unknown")
+      hostname = coalesce(try(item.get_spec.infra.hostname, null), "unknown")
+      provider = coalesce(try(item.get_spec.infra.provider_ref, null), "unknown")
+      state    = coalesce(try(item.object.status.current_state, null), "unknown")
+      network = [for nic in coalesce(try(item.get_spec.infra.hw_info.network, null), []) : {
+        device = coalesce(nic.name, "unknown")
+        mac    = coalesce(nic.mac_address, "unbound")
+      }]
+    }
+  ] : []
+  runtime_required = (var.bind_registered_interfaces && data.xcsh_site_registration.this.found &&
+  contains(["APPROVED", "ADMITTED", "ONLINE", "UPGRADING", "MAINTENANCE"], coalesce(data.xcsh_site_registration.this.state, "UNKNOWN")))
+  binding_valid = !var.bind_registered_interfaces || module.registration_mapping.valid
+  devices       = var.bind_registered_interfaces ? module.registration_mapping.devices : { slo = "eth0", sli = "eth1", external = "eth2" }
+  interfaces = [for device in ["eth0", "eth1", "eth2"] : {
+    device = device
+    mac    = var.bind_registered_interfaces ? try(one([for role, name in local.devices : local.role_macs[role] if name == device]), "") : ""
+    inside = device == local.devices.sli
+  }]
+}
+
+module "registration_mapping" {
+  source           = "../azure-registration-mapping"
+  site             = var.site_name
+  hostname         = var.hostname
+  macs             = local.role_macs
+  records          = local.registration_records
+  runtime_required = local.runtime_required
+  runtime_network  = local.runtime_required ? try(jsondecode(data.external.runtime_interfaces[0].result.network), []) : null
+}
+
+# Registration retains pre-upgrade device names. Admitted nodes must use the
+# running OS hardware facts; credential values never enter the external query.
+data "external" "runtime_interfaces" {
+  count   = local.runtime_required ? 1 : 0
+  program = ["python3", "${path.module}/../../scripts/xc-azure-runtime-interfaces.py"]
+  query = {
+    api_url         = "https://${var.labels["canada-xc-tenant"]}.console.ves.volterra.io"
+    site_name       = var.site_name
+    hostname        = var.hostname
+    role_macs       = jsonencode(local.role_macs)
+    observer_sha256 = filesha256("${path.module}/../../scripts/xc-azure-runtime-interfaces.py")
+  }
+}
+
+# The pre-boot node generation couples site and VM replacement without waiting
+# for a running guest, which could register before its configuration exists.
+resource "terraform_data" "ce_generation" {
+  input = var.ce_generation_id
+}
+
+# Single-node Secure Mesh v2 CE site with an EXPLICIT eth0/SLO interface. The
+# explicit interface is what makes XC auto-create the network_interface object
+# (var.interface_name) that the BGP peer binds to — without it a standalone bgp
+# object is accepted but never renders to FRR (see xcsh #1207).
+resource "xcsh_securemesh_site_v2" "this" {
+  count       = var.create_site ? 1 : 0
+  name        = var.site_name
+  namespace   = "system"
+  description = "MCN CE-HA (BGP/ECMP) single-node SMSv2 site ${var.site_name} — explicit eth0 SLO interface for BGP peer binding."
+  # `null`, not `{}`, when no labels are set. xcsh #1286 makes the provider preserve a
+  # config-declared empty map on the POST-APPLY read-back, but import has no config to
+  # read: the state carries only id/name/namespace and `ReadRequest` exposes nothing
+  # else, so a literal `{}` would still re-plan as `+ labels = {}` on the first
+  # post-import plan. Sending `null` when the map is empty stops asking the provider to
+  # distinguish "declared empty" from "absent" — something it cannot observe on import.
+  # (The nested `interface_list.labels {}` marker is a separate class, fixed by xcsh #1244.)
+  #
+  # EXPECTED ONE-TIME DRIFT AFTER A NODE (RE)REGISTERS. F5 XC stamps the node's
+  # hardware facts onto the site as labels (host-os-version, hw-model,
+  # hw-serial-number, hw-vendor, hw-version) once the CE registers. The next plan
+  # therefore shows `- labels = {...} -> null` for that site, and applying it
+  # settles — XC does not re-stamp them. It is one more convergence pass in the
+  # already two-phase deploy, not drift to chase; observed on the site rebuilt by
+  # the #674 CE replacement.
+  labels = length(var.labels) > 0 ? var.labels : null
+
+  azure {
+    not_managed {
+      node_list {
+        hostname  = var.hostname
+        type      = "Control"
+        public_ip = null
+
+        dynamic "interface_list" {
+          for_each = local.interfaces
+          content {
+            name = interface_list.value.device
+            ethernet_interface {
+              device = interface_list.value.device
+              mac    = interface_list.value.mac == null ? "" : interface_list.value.mac
+            }
+            network_option {
+              site_local_network        = interface_list.value.inside ? null : {}
+              site_local_inside_network = interface_list.value.inside ? {} : null
+            }
+            dhcp_client = {}
+          }
+        }
+      }
+    }
+  }
+
+  block_all_services = {}
+  disable_ha         = {}
+
+  dns_ntp_config {
+    f5_dns_default = {}
+    f5_ntp_default = {}
+  }
+
+  local_vrf {
+    default_config     = {}
+    default_sli_config = {}
+  }
+
+  logs_streaming_disabled = {}
+  no_forward_proxy        = {}
+  no_network_policy       = {}
+  no_s2s_connectivity_sli = {}
+  no_s2s_connectivity_slo = {}
+
+  offline_survivability_mode {
+    no_offline_survivability_mode = {}
+  }
+
+  performance_enhancement_mode {
+    perf_mode_l7_enhanced {
+      # The provider schema gives perf_mode_l7_enhanced a {jumbo_disabled | jumbo_enabled}
+      # sub-oneof. F5 materialises jumbo_disabled server-side, so leaving both members
+      # undeclared makes the site land and then re-plan the marker as a removal on
+      # every subsequent plan — it never reaches 0 changes. Declaring the server
+      # default explicitly is what settles it (same fix coverage/smsv2 took in #625).
+      jumbo_disabled = {}
+    }
+  }
+
+  re_select {
+    geo_proximity = {}
+  }
+
+  # CE software and OS selection is create-time configuration. The node always
+  # installs a destination build on first boot; an empty variable arms the
+  # default_* marker and means "install the newest version the server advertises."
+  # That is the deployment policy, not an accidental omission. The clean
+  # 2026-08-03 rebuild selected the advertised pair on all three 64 GB nodes and
+  # brought all three sites ONLINE. Issue #714 separately proves why the disk
+  # default carries headroom: the same pair failed on the marketplace image's
+  # 31 GiB disk and installed at every tested size from 33 GB upwards.
+  #
+  # Terraform cannot update these fields after creation: PUT is rejected when
+  # pinning forward, pinning backward, or clearing a pin. The platform can perform
+  # an in-place change through the site upgrade_sw and upgrade_os actions, but the
+  # provider cannot drive those actions yet (xcsh#1390). Set a concrete value only
+  # when deliberately reproducing an older build.
+  software_settings {
+    os {
+      default_os_version       = var.os_version == "" ? {} : null
+      operating_system_version = var.os_version == "" ? null : var.os_version
+    }
+    sw {
+      default_sw_version        = var.sw_version == "" ? {} : null
+      volterra_software_version = var.sw_version == "" ? null : var.sw_version
+    }
+  }
+
+  # Rebuild the site object whenever the CE VM instance it describes is rebuilt
+  # (issue #674).
+  #
+  # THE FAILURE THIS PREVENTS. A CE's runtime registration is bound to one node
+  # instance and holds the control plane's unique
+  # (tenant, cluster_name, hostname) index. Destroying the VM does NOT retire
+  # that registration, so the replacement node — same site, same hostname —
+  # cannot create its own: the create fails with UniqueSecondaryIndexViolation
+  # and retries on a ~65 s loop forever. Nothing recovers on its own, and worse,
+  # nothing in the graph noticed: with no reference to the node's identity
+  # anywhere, `terraform plan` reported "No changes" for the whole time the
+  # fleet was down.
+  #
+  # WHY REPLACING THE SITE IS THE FIX. Deleting the site object takes its
+  # registrations with it — observed live while replacing one CE: the site
+  # 404ed and the registration bound to the outgoing instance disappeared in the
+  # same poll — so the replacement node registers into a site whose index key is
+  # free. Deleting only the registration is not enough: the site keeps a status
+  # object that then rejects the node's workload request.
+  #
+  # The VM waits for this managed site. A generation change destroys the old
+  # VM/site pair, recreates the site, then boots the replacement guest.
+  lifecycle {
+    replace_triggered_by = [terraform_data.ce_generation]
+    precondition {
+      condition     = local.binding_valid
+      error_message = "Azure interface binding requires one current owned registration with three unique NIC MACs and exact guest devices."
+    }
+  }
+}
+
+# The approve API takes the runtime registration name ("r-<uuid>"), NOT the site
+# name (GET .../registrations/<site> -> 404). registrations_by_site returns
+# HTTP 200 with items:[] for a site whose CE has not registered yet, so this read
+# never fails an early apply — it just reports found = false.
+#
+# NOTE: this data source must never carry depends_on. Its inputs are statically
+# derived from ce_topology, so it resolves at plan time; a resource dependency
+# would make the count below unknown at plan time ("The count value depends on
+# resource attributes that cannot be determined until apply").
+data "xcsh_site_registration" "this" {
+  site_name = var.site_name # == passport.cluster_name (cloud-init ClusterName)
+  hostname  = var.hostname  # discriminator for multi-node sites
+  namespace = "system"
+}
+
+# Approve the CE registration so the node reaches ONLINE without the manual
+# console step (#1206 / #1210). The registration exists only after the CE boots
+# and registers via the token, so the first apply plans no approval; re-apply
+# once the CE has registered (see the deploy ordering in main.tf).
+#
+# The API approves NEW and PENDING registrations. Retired and
+# already-admitted registrations keep the same immutable action receipt.
+# The published provider verifies their cluster size and performs no new action.
+# Keeping the guard in the module rather than relying on provider selection also
+# protects installed provider versions that predate terminal-state filtering.
+#
+# Approval can auto-provision a site in XC, so it must wait for Terraform's
+# explicit site creation. The data source deliberately has no dependency: its
+# result determines this resource's plan-known count.
+resource "xcsh_registration_approval" "this" {
+  count = var.approve_registration && data.xcsh_site_registration.this.found && contains(["NEW", "PENDING", "APPROVED", "ADMITTED", "ONLINE", "UPGRADING", "MAINTENANCE"], data.xcsh_site_registration.this.state) ? 1 : 0
+
+  namespace    = "system"
+  name         = data.xcsh_site_registration.this.name
+  cluster_size = 1
+  state        = "APPROVED"
+
+  depends_on = [xcsh_securemesh_site_v2.this]
+}
+
+# One bgp object per CE site: eBGP from the CE (ASN var.ce_asn) to two regional FRR routers
+# (ASN var.peer_asn), one external peer per router IP, each bound to the explicit SLO interface.
+#
+# NOT BLOCKED — and nothing about this arm is gated any more. The object-ref name
+# length limit that used to block it is gone: the provider relaxed it to
+# stringvalidator.LengthBetween(1, 128) in v3.74.0, so the 71-char interface object
+# XC auto-generates for the explicit SLO interface
+# (ves-io-securemesh-site-v2-<site>-network-<hostname>-eth0-0) validates. The floor
+# that guarantees it is declared once, in versions.tf — do not restate the number.
+#
+# var.enable_bgp therefore defaults true and every test now runs with that default;
+# it survives only as an escape hatch for deploying the topology without BGP. It is
+# NOT an ordering gate: var.interface_name is derived statically from ce_topology, and
+# XC accepts a bgp object naming an interface that does not exist yet (it converges
+# once the CE is up — see the deploy ordering in the root main.tf).
+resource "xcsh_bgp" "this" {
+  count = var.enable_bgp ? 1 : 0
+
+  name        = "${var.site_name}-bgp"
+  namespace   = "system"
+  description = "CE ${var.site_name} BGP to Azure Route Server via explicit SLO interface."
+
+  where {
+    site {
+      ref {
+        namespace = "system"
+        name      = var.site_name
+      }
+      network_type         = "VIRTUAL_NETWORK_SITE_LOCAL"
+      disable_internet_vip = {}
+    }
+  }
+
+  bgp_parameters {
+    asn = var.ce_asn
+    # local_address {} = derive the BGP router ID from the interface's local
+    # address (the JSON's BGP_ROUTER_ID_FROM_INTERFACE; there is no separate
+    # bgp_router_id_type attribute in the provider schema).
+    local_address = {}
+  }
+
+  # Iterate over a plan-KNOWN peer count (rs_peer_count) and index into
+  # rs_peer_ips. The IP values may be unknown until the Route Server is applied,
+  # but the number of peers is fixed, so the block expands cleanly at plan time.
+  dynamic "peers" {
+    for_each = { for i in range(var.peer_count) : "azure-frr-${i + 1}" => i }
+    content {
+      metadata {
+        name = peers.key
+      }
+
+      external {
+        asn     = var.peer_asn
+        address = try(var.peer_ips[peers.value], "")
+        port    = var.peer_port
+
+        interface {
+          namespace = "system"
+          name      = var.interface_name
+        }
+
+        disable_v6 = {}
+      }
+
+      passive_mode_disabled = {}
+      bfd_disabled          = {}
+    }
+  }
+}
