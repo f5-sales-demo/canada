@@ -233,11 +233,16 @@ def main() -> None:
             "public": output("canada_public_re"),
             "subscription": output("azure_subscription_id"),
             "app_namespace": "canada-topology",
-            "app_objects": {
-                "http_loadbalancers": output("ca_loadbalancer_name"),
-                "origin_pools": output("ca_origin_pool_name"),
-                "virtual_sites": output("ca_ce_virtual_site_name"),
-            },
+            "app_objects": [
+                ("http_loadbalancers", output("ca_loadbalancer_name")),
+                (
+                    "http_loadbalancers",
+                    output("canada_public_re")["internal_loadbalancer"],
+                ),
+                ("service_policys", output("canada_public_re")["service_policy"]),
+                ("origin_pools", output("ca_origin_pool_name")),
+                ("virtual_sites", output("ca_ce_virtual_site_name")),
+            ],
         }
         (args.private_root / (stage + "-inventory.json")).write_text(
             json.dumps(inventory)
@@ -267,7 +272,7 @@ def main() -> None:
                     raise
             else:
                 raise ValueError("Canadian XC site remains after destroy")
-        for kind, name in inventory["app_objects"].items():
+        for kind, name in inventory["app_objects"]:
             try:
                 get(inventory["app_namespace"], kind, name)
             except urllib.error.HTTPError as error:

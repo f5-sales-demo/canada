@@ -80,12 +80,12 @@ variable "ca_internal_subnet_prefix" {
 }
 
 variable "ca_lb_domain" {
-  description = "Domain served by the Canada HTTP load balancer. Supply the existing Canadian hostname through private inputs."
+  description = "Exact public Canadian application hostname."
   type        = string
 
   validation {
-    condition     = endswith(var.ca_lb_domain, ".f5-sales-demo.ca") && can(regex("^([a-z0-9]([a-z0-9-]*[a-z0-9])?\\.)+[a-z]{2,}$", var.ca_lb_domain))
-    error_message = "ca_lb_domain must be a lowercase hostname under the configured tenant domain f5-sales-demo.ca."
+    condition     = var.ca_lb_domain == "canada.f5-sales-demo.ca"
+    error_message = "The public hostname must be exactly canada.f5-sales-demo.ca."
   }
 }
 

@@ -17,7 +17,22 @@ pool, binding, regional response headers and the exact Canadian origin marker.
 
 Origin ingress must equal the union of all provider-published Regional Edge/CDN
 CIDRs, both workstation /32s and exact owned Canadian probe addresses. Reject
-unlisted ingress. Origin SSH remains disabled.
+unlisted ingress. Origin SSH remains disabled. This infrastructure-source allowlist protects
+origin ingress; it is separate from public client country authorization.
 
 Finish with a refresh-enabled plan returning exit code zero, no resource actions
 and no output changes. Keep raw evidence private; publish only sanitized receipts.
+
+Public acceptance requires DNS for `canada.f5-sales-demo.ca` to resolve to the
+retained allocation, 120 successful Canadian-source requests, both exact RE
+selectees (`tr2-tor` and `mtl7-mon`), and the exact Canadian origin response.
+Denied non-Canadian requests must include spoofed `X-Forwarded-For`, `Forwarded`
+and `X-Real-IP` headers. Bind each negative receipt to its observed egress IP
+and the XC country classification of that actual source. An Azure region alone
+is not classification evidence. Unknown countries must remain denied.
+
+Audit source, rendered pages, machine-readable endpoints, state and live XC
+objects together. Unavailable live reads or stale rendered documentation fail
+acceptance. Repeat public and internal traffic checks during independent CE and
+FRR failures and after recovery. Publish only sanitized audit and acceptance
+receipts; retain observed source addresses and raw XC events in private evidence.

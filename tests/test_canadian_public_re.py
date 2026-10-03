@@ -30,12 +30,22 @@ class CanadianRETests(unittest.TestCase):
             "ce_virtual_site": "canada-ce",
             "namespace": "demo",
             "ce_sites": ["ca1", "ca2", "ca3"],
-            "domain": "canada.example.com",
+            "domain": "canada.f5-sales-demo.ca",
             "pool": "canada-pool",
             "loadbalancer": "canada-lb",
+            "service_policy": "canada-only",
             "origin_ip": "192.0.2.30",
         }
         self.objects = {
+            "service_policy": {
+                "spec": {
+                    "any_server": {},
+                    "allow_list": {
+                        "country_list": ["COUNTRY_CA"],
+                        "default_action_deny": {},
+                    },
+                }
+            },
             "public_ip": {
                 "spec": {
                     "ip": "192.0.2.55",
@@ -54,8 +64,12 @@ class CanadianRETests(unittest.TestCase):
             },
             "loadbalancer": {
                 "spec": {
-                    "domains": ["canada.example.com"],
+                    "domains": ["canada.f5-sales-demo.ca"],
                     "add_location": True,
+                    "disable_trust_client_ip_headers": {},
+                    "active_service_policies": {
+                        "policies": [{"name": "canada-only", "namespace": "demo"}]
+                    },
                     "advertise_custom": {
                         "advertise_where": [
                             {
@@ -66,11 +80,6 @@ class CanadianRETests(unittest.TestCase):
                                     }
                                 }
                             },
-                            *[
-                                {"site": {"site": {"name": site}}}
-                                for site in ["ca1", "ca2", "ca3"]
-                                for _ in range(2)
-                            ],
                         ]
                     },
                     "default_route_pools": [
@@ -124,7 +133,35 @@ class CanadianRETests(unittest.TestCase):
             lambda value: value["ce_selectees"]["items"].append({"name": "us-ce"}),
             lambda value: value["loadbalancer"]["spec"]["advertise_custom"][
                 "advertise_where"
-            ][1]["site"]["site"].update(name="us-ce"),
+            ].append({"site": {"site": {"name": "ca1"}}}),
+            lambda value: value["loadbalancer"]["spec"].update(
+                domains=["old.f5-sales-demo.ca"]
+            ),
+            lambda value: value["loadbalancer"]["spec"].update(
+                service_policies_from_namespace={}
+            ),
+            lambda value: value["loadbalancer"]["spec"].update(
+                disable_trust_client_ip_headers=None
+            ),
+            lambda value: value["loadbalancer"]["spec"]["active_service_policies"][
+                "policies"
+            ].append({"name": "exceptions"}),
+            lambda value: value["service_policy"]["spec"]["allow_list"][
+                "country_list"
+            ].append("COUNTRY_US"),
+            lambda value: value["service_policy"]["spec"]["allow_list"][
+                "country_list"
+            ].append("COUNTRY_NONE"),
+            lambda value: value["service_policy"]["spec"]["allow_list"].update(
+                default_action_allow={}
+            ),
+            lambda value: value["service_policy"]["spec"]["allow_list"].update(
+                prefix_list={"prefixes": ["192.0.2.1/32"]}
+            ),
+            lambda value: value["service_policy"]["spec"]["allow_list"].update(
+                asn_list={"as_numbers": [64512]}
+            ),
+            lambda value: value["service_policy"]["spec"].update(disable=True),
             lambda value: value["loadbalancer"]["spec"]["default_route_pools"][0][
                 "pool"
             ].update(name="us-pool"),

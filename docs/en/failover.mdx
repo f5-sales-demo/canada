@@ -13,3 +13,8 @@ A recovery trap starts a stopped node if verification fails.
 
 Reject non-Canadian origin selection and any route outside the owned Canadian
 topology. Repeat normal verification after recovery.
+
+Use `internal.canada.f5-sales-demo.ca` for BGP and ILB diagnostics. Verify the
+public `canada.f5-sales-demo.ca` path from a verified Canadian source during each
+failure and recovery as well. Internal-path success alone does not accept the
+public country policy.

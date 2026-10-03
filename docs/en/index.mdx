@@ -4,8 +4,13 @@ description: Canadian regional F5 Distributed Cloud deployment
 ---
 
 Three Azure Customer Edges in Canada use two FRR relays and Azure Route Server
-to advertise an application VIP. Toronto and Montreal Regional Edges reach an
-origin discovered exclusively through the Canadian CE selector.
+to advertise an internal diagnostic VIP. The public application at
+`canada.f5-sales-demo.ca` uses only the reserved VIP on Toronto and Montreal
+Regional Edges and an origin discovered exclusively through three Canadian CEs.
+An explicitly selected service policy allows only actual IPv4 source addresses
+classified as Canada by XC GeoIP, with default denial and no exceptions.
+Unknown countries are denied; client forwarding headers are never trusted.
+Public IPv6 remains unpublished until equivalent enforcement is verified.
 
 Start with [deployment](./deployment/), then [verification](./verification/).
 Exercise [failover](./failover/) and use [teardown](./teardown/) for a scoped reset.

@@ -150,7 +150,7 @@ CA_ORIGIN=$(tf_raw ca_origin_ip)
 [[ "$CA_ORIGIN" =~ ^[0-9.]+$ ]] || die "ca_origin_ip is not an IPv4 literal"
 ORIGIN=$CA_ORIGIN
 run_region canada "$(tf_raw ca_resource_group_name)" "$(tf_raw ca_client_vm_name)" "$(tf_raw canada_client_nic_name)" \
-  "$(tf_raw ca_vip)" "$(tf_raw ca_lb_domain)" "$(tf_raw canada_ilb_application_domain)" \
+  "$(tf_raw ca_vip)" "$(tf_raw canada_internal_application_domain)" "$(tf_raw canada_ilb_application_domain)" \
   "$(tf_raw canada_ilb_private_ip)" "$(tf_raw canada_ilb_console_ip)" \
   "$(tf_json ca_ce_vm_names)" "$(tf_json canada_frr_vm_names)" \
   "$(tf_json canada_ce_mgmt_private_ips | jq -c '[.[]]')" "$(tf_json canada_route_server_peer_ips)" "$(tf_json canada_frr_peer_ips)"

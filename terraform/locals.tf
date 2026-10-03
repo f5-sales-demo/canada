@@ -74,7 +74,7 @@ locals {
 
   ca_ce_vsite_name = "${coalesce(var.ca_ce_vsite_name, "${var.component}-ca-ce-vsite")}${local.deployment_name_suffix}"
 
-  ca_lb_domain = local.deployment_is_production ? var.ca_lb_domain : "${local.deployment_environment_key}.${var.ca_lb_domain}"
+  ca_lb_domain = var.ca_lb_domain
 
   standard_tags = {
     component                = var.component

@@ -24,6 +24,8 @@ ROOTS = {
     "xcsh_virtual_site.canada_ce",
     "xcsh_origin_pool.canada",
     "xcsh_http_loadbalancer.canada",
+    "xcsh_http_loadbalancer.internal",
+    "xcsh_service_policy.canada_only",
     "xcsh_public_ip_binding.canada",
     "terraform_data.canada_public_ip_gate",
     "terraform_data.deployment_guard",
@@ -49,6 +51,29 @@ def validate(plan: dict, mode: str) -> None:
             for root in ROOTS
         ):
             raise ValueError("foreign resource in Canadian plan: " + address)
+        if mode == "application" and actions != ["no-op"]:
+            application = address.startswith(
+                (
+                    "xcsh_http_loadbalancer.",
+                    "xcsh_service_policy.",
+                    "module.azure_ilb_application_ca",
+                )
+            )
+            provenance = actions == ["update"] and all(
+                resource["change"].get("before", {}).get(key)
+                == resource["change"].get("after", {}).get(key)
+                for key in set(resource["change"].get("before", {}))
+                | set(resource["change"].get("after", {}))
+                if key not in {"labels", "tags", "description", "input", "output"}
+            )
+            if not application and not provenance:
+                raise ValueError(
+                    "application cutover changes infrastructure: " + address
+                )
+            if not application and ("delete" in actions or "create" in actions):
+                raise ValueError(
+                    "application cutover replaces infrastructure: " + address
+                )
         if mode == "destroy" and actions not in (["delete"], ["no-op"]):
             raise ValueError("destroy includes a non-deletion: " + address)
         if mode == "zero" and actions != ["no-op"]:
@@ -63,7 +88,9 @@ def validate(plan: dict, mode: str) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("plan")
-    parser.add_argument("--mode", choices=["build", "destroy", "zero"], required=True)
+    parser.add_argument(
+        "--mode", choices=["build", "destroy", "zero", "application"], required=True
+    )
     args = parser.parse_args()
     with Path(args.plan).open(encoding="utf-8") as source:
         validate(json.load(source), args.mode)
