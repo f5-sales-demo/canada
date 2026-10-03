@@ -1,7 +1,7 @@
 """Canadian public RE isolation acceptance regression tests."""
 
 # pylint: disable=invalid-name,missing-class-docstring,missing-function-docstring
-# ruff: noqa: INP001, PT009, PT027
+# ruff: noqa: PT009, PT027
 import copy
 import importlib.util
 import unittest
