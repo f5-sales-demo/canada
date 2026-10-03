@@ -82,7 +82,7 @@ def validate_policy(config: dict[str, Any], objects: dict[str, Any]) -> None:
     """Require an explicitly selected, unmodified Canada-only country policy."""
     lb = objects["loadbalancer"]["spec"]
     if lb.get("disable_trust_client_ip_headers") != {} or any(
-        lb.get(key) is not None
+        lb.get(key) not in (None, [])
         for key in [
             "service_policies_from_namespace",
             "no_service_policies",
