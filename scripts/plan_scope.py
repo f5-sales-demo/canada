@@ -23,6 +23,7 @@ ROOTS = {
     "xcsh_virtual_site.canada_re",
     "xcsh_virtual_site.canada_ce",
     "xcsh_origin_pool.canada",
+    "xcsh_http_loadbalancer.canada",
     "xcsh_public_ip_binding.canada",
     "terraform_data.canada_public_ip_gate",
     "terraform_data.deployment_guard",
