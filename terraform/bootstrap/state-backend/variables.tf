@@ -15,4 +15,3 @@ variable "workstation_egress_ips" {
     error_message = "Supply both verified workstation public IPv4 addresses without CIDR suffixes."
   }
 }
-variable "operator_principal_id" { type = string }

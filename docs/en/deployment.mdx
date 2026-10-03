@@ -11,9 +11,9 @@ MCN retains ownership of that shared prerequisite; Canada Topology does not
 duplicate it in its state.
 
 Bootstrap `terraform/bootstrap/state-backend` separately in Canada Central.
-Supply the subscription, unique storage name, operator principal and both
+Supply the subscription, unique storage name, both
 verified workstation public addresses through private inputs. The backend uses
-Entra authentication, scoped Blob Data Contributor access, private containers,
+the existing Azure CLI/Entra login, private containers,
 versioning and 30-day deletion recovery. Shared keys and anonymous access are
 disabled; only the two workstations may reach storage. Terraform uses blob leases
 for locking.

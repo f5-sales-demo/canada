@@ -28,15 +28,9 @@ resource "azurerm_storage_account" "state" {
   tags = azurerm_resource_group.state.tags
   lifecycle { prevent_destroy = true }
 }
-resource "azurerm_role_assignment" "operator" {
-  scope                = azurerm_storage_account.state.id
-  role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = var.operator_principal_id
-}
 resource "azurerm_storage_container" "state" {
   name                  = "tfstate"
   storage_account_id    = azurerm_storage_account.state.id
   container_access_type = "private"
-  depends_on            = [azurerm_role_assignment.operator]
   lifecycle { prevent_destroy = true }
 }

@@ -43,7 +43,6 @@ class ExtractionTests(unittest.TestCase):
             "versioning_enabled = true",
             "days = 30",
             'container_access_type = "private"',
-            "Storage Blob Data Contributor",
             'default_action = "Deny"',
         ]:
             import re
