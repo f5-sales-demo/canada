@@ -53,6 +53,7 @@ class ExtractionTests(unittest.TestCase):
         self.assertNotIn("terraform/bootstrap", lifecycle)
         self.assertIn("fcntl.LOCK_EX", lifecycle)
         self.assertIn("validate(data, mode)", lifecycle)
+        self.assertIn('inventory["app_objects"]', lifecycle)
 
 
 if __name__ == "__main__":

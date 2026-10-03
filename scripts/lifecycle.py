@@ -208,6 +208,12 @@ def main():
             "sites": list(output("ca_xc_site_names").values()),
             "public": output("canada_public_re"),
             "subscription": output("azure_subscription_id"),
+            "app_namespace": "canada-topology",
+            "app_objects": {
+                "http_loadbalancers": output("ca_loadbalancer_name"),
+                "origin_pools": output("ca_origin_pool_name"),
+                "virtual_sites": output("ca_ce_virtual_site_name"),
+            },
         }
         (args.private_root / (stage + "-inventory.json")).write_text(
             json.dumps(inventory)
@@ -237,6 +243,14 @@ def main():
                     raise
             else:
                 raise ValueError("Canadian XC site remains after destroy")
+        for kind, name in inventory["app_objects"].items():
+            try:
+                get(inventory["app_namespace"], kind, name)
+            except urllib.error.HTTPError as error:
+                if error.code != 404:
+                    raise
+            else:
+                raise ValueError("Canadian application object remains after destroy")
         allocation = inventory["public"]["allocation"]
         get(allocation["namespace"], "public_ips", allocation["name"])
         (args.private_root / (stage + "-absence.json")).write_text(
