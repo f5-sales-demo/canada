@@ -47,7 +47,7 @@ variables {
   ca_client_vm_name      = null
   ca_region_short        = null
   ca_resource_group_name = null
-  ca_lb_domain           = "canada.example.com"
+  ca_lb_domain           = "canada.f5-sales-demo.ca"
   deployer               = "tester"
   ssh_public_key         = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKzwDqvgRGHaZqbo57o/AxuuqRNPT9MqeYNYsK1Owh8l plan-test-only"
   enable_canada          = true

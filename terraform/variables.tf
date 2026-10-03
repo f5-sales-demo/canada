@@ -84,8 +84,8 @@ variable "ca_lb_domain" {
   type        = string
 
   validation {
-    condition     = can(regex("^([a-z0-9]([a-z0-9-]*[a-z0-9])?\\.)+[a-z]{2,}$", var.ca_lb_domain))
-    error_message = "ca_lb_domain must be a fully-qualified lowercase domain name (for example canada.example.com)."
+    condition     = endswith(var.ca_lb_domain, ".f5-sales-demo.ca") && can(regex("^([a-z0-9]([a-z0-9-]*[a-z0-9])?\\.)+[a-z]{2,}$", var.ca_lb_domain))
+    error_message = "ca_lb_domain must be a lowercase hostname under the configured tenant domain f5-sales-demo.ca."
   }
 }
 

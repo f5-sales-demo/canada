@@ -34,3 +34,6 @@ Apply the bootstrap phase, wait for all three CE registrations, then plan and
 apply `azure_site_configuration_phase=configured` to bind observed NIC MACs and
 approve registrations. Always save and review the full plan before applying it.
 Canadian resources must remain in Canada Central or Canada East. Bastion is opt-in.
+
+The public hostname must be under the tenant's configured Canadian domain
+`f5-sales-demo.ca`. Preserve the existing private hostname during cutover.
