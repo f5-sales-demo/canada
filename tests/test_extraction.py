@@ -33,6 +33,27 @@ class ExtractionTests(unittest.TestCase):
         self.assertTrue(sources)
         self.assertTrue(all(s.startswith(("./modules/", "../")) for s in sources))
 
+    def test_backend_security_and_teardown_boundary(self):
+        bootstrap = ROOT / "terraform/bootstrap/state-backend/main.tf"
+        text = bootstrap.read_text()
+        for contract in [
+            'location = "canadacentral"',
+            "shared_access_key_enabled = false",
+            "allow_nested_items_to_be_public = false",
+            "versioning_enabled = true",
+            "days = 30",
+            'container_access_type = "private"',
+            "Storage Blob Data Contributor",
+            'default_action = "Deny"',
+        ]:
+            import re
+
+            assert re.sub(r"\s+", " ", contract) in re.sub(r"\s+", " ", text)
+        lifecycle = (ROOT / "scripts/lifecycle.py").read_text()
+        self.assertNotIn("terraform/bootstrap", lifecycle)
+        self.assertIn("fcntl.LOCK_EX", lifecycle)
+        self.assertIn("validate(data, mode)", lifecycle)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -21,4 +21,4 @@ sed -i 's/^bgpd=no/bgpd=yes/' /etc/frr/daemons
 sysctl -w net.ipv4.ip_forward=1 net.ipv4.conf.all.rp_filter=2
 systemctl enable --now frr
 systemctl restart frr
-systemctl enable --now mcn-vip-translation.timer
+systemctl enable --now canada-topology-vip-translation.timer

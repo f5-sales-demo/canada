@@ -9,7 +9,7 @@ import json
 import pathlib
 import subprocess
 
-CHAIN = "MCN_VIP"
+CHAIN = "CANADA_VIP"
 HTTP_PORT = "80"
 
 
@@ -121,7 +121,7 @@ def converge(vip: str, router_ip: str, ce_ips: list[str]) -> None:
         ]
         if run(["iptables", "-t", "nat", "-C", *rule], check=False).returncode:
             run(["iptables", "-t", "nat", "-A", *rule])
-    pathlib.Path("/run/mcn-vip-translation.json").write_text(
+    pathlib.Path("/run/canada-topology-vip-translation.json").write_text(
         json.dumps({"vip": vip, "eligible_ce_count": len(eligible), "backend": target})
     )
 

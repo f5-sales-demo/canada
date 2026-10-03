@@ -1,6 +1,6 @@
 #cloud-config
 write_files:
-  - path: /etc/sysctl.d/90-mcn-frr.conf
+  - path: /etc/sysctl.d/90-canada-topology-frr.conf
     permissions: '0644'
     content: |
       net.ipv4.ip_forward=1
@@ -9,7 +9,7 @@ write_files:
     permissions: '0700'
     content: |
       ${indent(6, bootstrap_script)}
-  - path: /etc/systemd/system/mcn-frr-bootstrap.service
+  - path: /etc/systemd/system/canada-topology-frr-bootstrap.service
     permissions: '0644'
     content: |
       [Unit]
@@ -27,7 +27,7 @@ write_files:
     permissions: '0700'
     content: |
       ${indent(6, vip_translation_script)}
-  - path: /etc/systemd/system/mcn-vip-translation.service
+  - path: /etc/systemd/system/canada-topology-vip-translation.service
     permissions: '0644'
     content: |
       [Unit]
@@ -36,7 +36,7 @@ write_files:
       [Service]
       Type=oneshot
       ExecStart=/usr/bin/python3 /usr/local/lib/mcn/vip_translation.py --vip ${vip} --router-ip ${router_ip} --ce-ips ${join(" ", ce_ips)}
-  - path: /etc/systemd/system/mcn-vip-translation.timer
+  - path: /etc/systemd/system/canada-topology-vip-translation.timer
     permissions: '0644'
     content: |
       [Unit]
@@ -51,7 +51,7 @@ write_files:
     permissions: '0640'
     content: |
       frr defaults traditional
-      hostname mcn-frr
+      hostname canada-topology-frr
       service integrated-vtysh-config
       log syslog informational
       ip prefix-list VIP seq 10 permit ${vip}/32
@@ -87,4 +87,4 @@ write_files:
        exit-address-family
 runcmd:
   - [systemctl, daemon-reload]
-  - [systemctl, enable, --now, --no-block, mcn-frr-bootstrap.service]
+  - [systemctl, enable, --now, --no-block, canada-topology-frr-bootstrap.service]
