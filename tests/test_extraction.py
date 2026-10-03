@@ -9,7 +9,7 @@ class ExtractionTests(unittest.TestCase):
         terraform = ROOT / "terraform"
         source = "\n".join(p.read_text() for p in terraform.glob("*.tf"))
         self.assertIn('resource "xcsh_namespace" "canada"', source)
-        self.assertIn('backend "azurerm"', source)
+        self.assertIn('backend "local"', source)
         self.assertIn("f5-sales-demo/canada-topology", source)
         self.assertNotIn("f5-sales-demo/multi-cloud-networking", source)
         self.assertNotIn('provider "aws"', source)
@@ -34,22 +34,14 @@ class ExtractionTests(unittest.TestCase):
         self.assertTrue(all(s.startswith(("./modules/", "../")) for s in sources))
 
     def test_backend_security_and_teardown_boundary(self):
-        bootstrap = ROOT / "terraform/bootstrap/state-backend/main.tf"
-        text = bootstrap.read_text()
-        for contract in [
-            'location = "canadacentral"',
-            "shared_access_key_enabled = false",
-            "allow_nested_items_to_be_public = false",
-            "versioning_enabled = true",
-            "days = 30",
-            'container_access_type = "private"',
-            'default_action = "Deny"',
-        ]:
-            import re
-
-            assert re.sub(r"\s+", " ", contract) in re.sub(r"\s+", " ", text)
+        backend = (ROOT / "terraform/backend.tf").read_text()
+        self.assertIn('backend "local"', backend)
+        self.assertFalse((ROOT / "terraform/bootstrap").exists())
         lifecycle = (ROOT / "scripts/lifecycle.py").read_text()
-        self.assertNotIn("terraform/bootstrap", lifecycle)
+        self.assertIn(
+            "local state must be absolute and outside the checkout", lifecycle
+        )
+        self.assertIn("local state directory must have mode 0700", lifecycle)
         self.assertIn("fcntl.LOCK_EX", lifecycle)
         self.assertIn("validate(data, mode)", lifecycle)
         self.assertIn('inventory["app_objects"]', lifecycle)

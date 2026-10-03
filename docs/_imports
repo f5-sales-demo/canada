@@ -1,10 +1,6 @@
 SOURCE_ATTRIBUTION.md
 terraform/azure_ilb_xc.tf -> azure_ilb_xc.tf
 terraform/backend.tf -> backend.tf
-terraform/bootstrap/state-backend/main.tf -> bootstrap/state-backend/main.tf
-terraform/bootstrap/state-backend/outputs.tf -> bootstrap/state-backend/outputs.tf
-terraform/bootstrap/state-backend/variables.tf -> bootstrap/state-backend/variables.tf
-terraform/bootstrap/state-backend/versions.tf -> bootstrap/state-backend/versions.tf
 terraform/ca_ilb.tf -> ca_ilb.tf
 terraform/data.tf -> data.tf
 terraform/locals.tf -> locals.tf

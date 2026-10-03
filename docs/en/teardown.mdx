@@ -4,8 +4,8 @@ description: Destroy only owned Canadian demo resources
 ---
 
 Use a reviewed saved destroy plan from the demo root with an exclusive operator
-lock and the Azure Blob backend lease. Require only owned Canadian demo deletions.
-The backend bootstrap is a separate root and excluded from demo teardown.
+lock and Terraform's local state lock. Require only owned Canadian demo deletions.
+The protected local state directory and backups remain outside demo teardown.
 
 The application namespace, token, Canadian Azure resources and selector binding
 are owned by this deployment. The reserved public-IP allocation itself must remain

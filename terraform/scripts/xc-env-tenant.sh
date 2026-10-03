@@ -26,11 +26,11 @@ url="${XCSH_API_URL:-}"
 #   2. drop everything from the   4. keep only the first hostname label
 #      first / ? or #
 xc_label=$(
-	printf '%s' "$url" |
-		sed -e 's#^[A-Za-z][A-Za-z0-9+.-]*://##' \
-			-e 's#[/?#].*##' \
-			-e 's#:[0-9]*$##' \
-			-e 's#\..*##'
+  printf '%s' "$url" |
+    sed -e 's#^[A-Za-z][A-Za-z0-9+.-]*://##' \
+      -e 's#[/?#].*##' \
+      -e 's#:[0-9]*$##' \
+      -e 's#\..*##'
 )
 
 # Belt and braces: the value is interpolated into JSON, so allow only the
@@ -43,9 +43,9 @@ esac
 # api_url_set distinguishes "no XCSH_API_URL at all" (CI, and the guard abstains)
 # from "XCSH_API_URL set to something unparseable" (a real misconfiguration).
 if [ -n "$url" ]; then
-	api_url_set=true
+  api_url_set=true
 else
-	api_url_set=false
+  api_url_set=false
 fi
 
 identity_key=tenant

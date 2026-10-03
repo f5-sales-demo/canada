@@ -4,16 +4,16 @@ set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
 installed=false
 for attempt in $(seq 1 20); do
-	if apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=20 &&
-		apt-get install -y -o Acquire::Retries=3 -o Acquire::http::Timeout=20 frr; then
-		installed=true
-		break
-	fi
-	sleep 15
+  if apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=20 &&
+    apt-get install -y -o Acquire::Retries=3 -o Acquire::http::Timeout=20 frr; then
+    installed=true
+    break
+  fi
+  sleep 15
 done
 [ "$installed" = true ] || {
-	echo 'FRR package installation exceeded bounded retry window' >&2
-	exit 1
+  echo 'FRR package installation exceeded bounded retry window' >&2
+  exit 1
 }
 install -m 640 /var/lib/mcn/frr.conf /etc/frr/frr.conf
 chown frr:frr /etc/frr/frr.conf

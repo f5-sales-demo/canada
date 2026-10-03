@@ -12,8 +12,8 @@ trap 'rm -rf "$WORK"' EXIT
 FAIL=0
 ok() { printf '  ok   — %s\n' "$1"; }
 bad() {
-	printf '  FAIL — %s\n' "$1"
-	FAIL=1
+  printf '  FAIL — %s\n' "$1"
+  FAIL=1
 }
 
 mkdir -p "${WORK}/bin"
@@ -182,135 +182,135 @@ EOF
 chmod +x "${WORK}/bin/terraform" "${WORK}/bin/curl" "${WORK}/bin/az"
 
 run_uat() {
-	PATH="${WORK}/bin:${PATH}" \
-		XCSH_API_URL="https://example.invalid" \
-		XCSH_API_TOKEN="<XC_API_TOKEN>" \
-		CANADA_UAT_TEST_MODE=1 \
-		bash "$SCRIPT" \
-		--terraform-dir terraform \
-		--subscription 00000000-0000-0000-0000-000000000000 \
-		--evidence-dir "${WORK}/evidence-$1" \
-		--samples-per-batch 50 \
-		--max-batches 3 \
-		--batch-interval 0 \
-		--skip-console
+  PATH="${WORK}/bin:${PATH}" \
+    XCSH_API_URL="https://example.invalid" \
+    XCSH_API_TOKEN="<XC_API_TOKEN>" \
+    CANADA_UAT_TEST_MODE=1 \
+    bash "$SCRIPT" \
+    --terraform-dir terraform \
+    --subscription 00000000-0000-0000-0000-000000000000 \
+    --evidence-dir "${WORK}/evidence-$1" \
+    --samples-per-batch 50 \
+    --max-batches 3 \
+    --batch-interval 0 \
+    --skip-console
 }
 
 echo "1. healthy deployment passes every aggregate gate"
 if OUT=$(run_uat healthy 2>&1); then
-	for expected in 'sites_online=3/3' 'azure_vms_running=3/3' 'password_extensions_succeeded=3/3' 'canada_ilb_reachable=yes' 'ca_lb_samples=150' 'origin_failures=0' 'converged=yes'; do
-		if grep -qF "$expected" <<<"$OUT"; then
-			ok "reported ${expected}"
-		else
-			bad "missing ${expected} from output"
-		fi
-	done
-	if jq -e '.sites_online == 3 and .azure_vms_running == 3 and .password_extensions_succeeded == 3 and .canada_ilb_reachable == "yes" and .ca_lb_samples == 150 and .converged == true' "${WORK}/evidence-healthy/summary.json" >/dev/null; then
-		ok "wrote a machine-readable aggregate summary"
-	else
-		bad "aggregate summary is missing or incorrect"
-	fi
-	if [ ! -e "${WORK}/evidence-healthy/terraform-output.json" ]; then
-		ok "kept sensitive Terraform outputs out of sanitized evidence"
-	else
-		bad "wrote sensitive Terraform output snapshot"
-	fi
+  for expected in 'sites_online=3/3' 'azure_vms_running=3/3' 'password_extensions_succeeded=3/3' 'canada_ilb_reachable=yes' 'ca_lb_samples=150' 'origin_failures=0' 'converged=yes'; do
+    if grep -qF "$expected" <<<"$OUT"; then
+      ok "reported ${expected}"
+    else
+      bad "missing ${expected} from output"
+    fi
+  done
+  if jq -e '.sites_online == 3 and .azure_vms_running == 3 and .password_extensions_succeeded == 3 and .canada_ilb_reachable == "yes" and .ca_lb_samples == 150 and .converged == true' "${WORK}/evidence-healthy/summary.json" >/dev/null; then
+    ok "wrote a machine-readable aggregate summary"
+  else
+    bad "aggregate summary is missing or incorrect"
+  fi
+  if [ ! -e "${WORK}/evidence-healthy/terraform-output.json" ]; then
+    ok "kept sensitive Terraform outputs out of sanitized evidence"
+  else
+    bad "wrote sensitive Terraform output snapshot"
+  fi
 else
-	bad "healthy UAT failed: ${OUT}"
+  bad "healthy UAT failed: ${OUT}"
 fi
 
 echo "2. a CE stuck in Azure provisioning fails the UAT"
 if AZ_VM_MODE=stuck run_uat stuck-vm >/dev/null 2>&1; then
-	bad "UAT passed with one CE still starting in Azure"
+  bad "UAT passed with one CE still starting in Azure"
 else
-	ok "rejected the stuck Azure VM"
+  ok "rejected the stuck Azure VM"
 fi
 
 echo "3. a stuck password-rotation extension fails the UAT"
 if AZ_EXTENSION_MODE=stuck run_uat stuck-extension >/dev/null 2>&1; then
-	bad "UAT passed with one password extension still creating"
+  bad "UAT passed with one password extension still creating"
 else
-	ok "rejected the stuck Azure VM extension"
+  ok "rejected the stuck Azure VM extension"
 fi
 
 echo "4. an unreachable ILB fails the UAT"
 if AZ_ILB_MODE=missing run_uat missing-ilb >/dev/null 2>&1; then
-	bad "UAT passed with an unreachable ILB"
+  bad "UAT passed with an unreachable ILB"
 else
-	ok "rejected the unreachable ILB"
+  ok "rejected the unreachable ILB"
 fi
 
 echo "6. fewer than 100 possible samples is rejected before any API call"
 if PATH="${WORK}/bin:${PATH}" CANADA_UAT_TEST_MODE=1 bash "$SCRIPT" \
-	--terraform-dir terraform \
-	--subscription 00000000-0000-0000-0000-000000000000 \
-	--evidence-dir "${WORK}/evidence-too-small" \
-	--samples-per-batch 30 \
-	--max-batches 3 \
-	--batch-interval 0 \
-	--skip-console >/dev/null 2>&1; then
-	bad "accepted a run capped below 100 samples"
+  --terraform-dir terraform \
+  --subscription 00000000-0000-0000-0000-000000000000 \
+  --evidence-dir "${WORK}/evidence-too-small" \
+  --samples-per-batch 30 \
+  --max-batches 3 \
+  --batch-interval 0 \
+  --skip-console >/dev/null 2>&1; then
+  bad "accepted a run capped below 100 samples"
 else
-	ok "enforced the 100-sample minimum"
+  ok "enforced the 100-sample minimum"
 fi
 
 echo "7. a transient Azure Run Command conflict is retried"
 if OUT=$(AZ_RUN_COMMAND_MODE=conflict-once \
-	AZ_RUN_COMMAND_COUNT_FILE="${WORK}/run-command-conflict-seen" \
-	run_uat transient-conflict 2>&1); then
-	if grep -qF 'converged=yes' <<<"$OUT"; then
-		ok "recovered from the transient Azure conflict"
-	else
-		bad "retry run completed without convergence evidence"
-	fi
+  AZ_RUN_COMMAND_COUNT_FILE="${WORK}/run-command-conflict-seen" \
+  run_uat transient-conflict 2>&1); then
+  if grep -qF 'converged=yes' <<<"$OUT"; then
+    ok "recovered from the transient Azure conflict"
+  else
+    bad "retry run completed without convergence evidence"
+  fi
 else
-	bad "transient Azure conflict aborted the UAT: ${OUT}"
+  bad "transient Azure conflict aborted the UAT: ${OUT}"
 fi
 
 echo "8. factory credentials fail and generated credentials pass on every console"
 if OUT=$(PATH="${WORK}/bin:${PATH}" \
-	XCSH_API_URL="https://example.invalid" \
-	XCSH_API_TOKEN="<XC_API_TOKEN>" \
-	CANADA_FACTORY_PASSWORD="<FACTORY_SITE_CONSOLE_PASSWORD>" \
-	CANADA_UAT_TEST_MODE=1 \
-	bash "$SCRIPT" \
-	--terraform-dir terraform \
-	--subscription 00000000-0000-0000-0000-000000000000 \
-	--evidence-dir "${WORK}/evidence-console" \
-	--samples-per-batch 50 \
-	--max-batches 3 \
-	--batch-interval 0 2>&1); then
-	for expected in 'console_factory_rejected=3/3' 'console_generated_accepted=3/3'; do
-		if grep -qF "$expected" <<<"$OUT"; then
-			ok "reported ${expected}"
-		else
-			bad "missing ${expected} from output"
-		fi
-	done
+  XCSH_API_URL="https://example.invalid" \
+  XCSH_API_TOKEN="<XC_API_TOKEN>" \
+  CANADA_FACTORY_PASSWORD="<FACTORY_SITE_CONSOLE_PASSWORD>" \
+  CANADA_UAT_TEST_MODE=1 \
+  bash "$SCRIPT" \
+  --terraform-dir terraform \
+  --subscription 00000000-0000-0000-0000-000000000000 \
+  --evidence-dir "${WORK}/evidence-console" \
+  --samples-per-batch 50 \
+  --max-batches 3 \
+  --batch-interval 0 2>&1); then
+  for expected in 'console_factory_rejected=3/3' 'console_generated_accepted=3/3'; do
+    if grep -qF "$expected" <<<"$OUT"; then
+      ok "reported ${expected}"
+    else
+      bad "missing ${expected} from output"
+    fi
+  done
 else
-	bad "Site Console UAT failed: ${OUT}"
+  bad "Site Console UAT failed: ${OUT}"
 fi
 
 echo "9. the verifier requires both BGP and ILB application paths"
 if grep -Fq 'show-effective-route-table' "$SCRIPT" && grep -Fq 'CANADA_FRR' "$SCRIPT"; then
-	ok "default verifier checks FRR sessions and both VIP next hops"
+  ok "default verifier checks FRR sessions and both VIP next hops"
 else
-	bad "default verifier omits the Azure BGP path"
+  bad "default verifier omits the Azure BGP path"
 fi
 if AZ_BGP_MODE=missing-ce run_uat missing-bgp >/dev/null 2>&1; then
-	bad "UAT passed with a missing direct CE-FRR session"
+  bad "UAT passed with a missing direct CE-FRR session"
 else
-	ok "rejected a missing direct CE-FRR session"
+  ok "rejected a missing direct CE-FRR session"
 fi
 if grep -Fq 'canada_ilb_private_ip' "$SCRIPT"; then
-	ok "default verifier requires the retained US ILB endpoint"
+  ok "default verifier requires the retained US ILB endpoint"
 else
-	bad "default verifier does not require the retained ILB endpoint"
+  bad "default verifier does not require the retained ILB endpoint"
 fi
 
 if [ "$FAIL" -eq 0 ]; then
-	echo "PASS: deployment UAT harness"
+  echo "PASS: deployment UAT harness"
 else
-	echo "FAIL: deployment UAT harness"
+  echo "FAIL: deployment UAT harness"
 fi
 exit "$FAIL"

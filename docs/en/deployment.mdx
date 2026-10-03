@@ -10,13 +10,15 @@ Accept the Azure Customer Edge Marketplace terms once at subscription scope.
 MCN retains ownership of that shared prerequisite; Canada Topology does not
 duplicate it in its state.
 
-Bootstrap `terraform/bootstrap/state-backend` separately in Canada Central.
-Supply the subscription, unique storage name, both
-verified workstation public addresses through private inputs. The backend uses
-the existing Azure CLI/Entra login, private containers,
-versioning and 30-day deletion recovery. Shared keys and anonymous access are
-disabled; only the two workstations may reach storage. Terraform uses blob leases
-for locking.
+Use the local Terraform backend on the Ubuntu deployment workstation. Keep the
+state and backups outside the checkout in a directory with mode 0700, and keep
+the backend configuration at mode 0600. It contains only an absolute path to the
+independent Canada Topology state file. Local state contains credentials, so use
+the workstation's protected storage and private backup process.
+
+Azure deployment uses the existing local Azure CLI login. No new Blob data role,
+storage key or cloud credential is required. The lifecycle holds an exclusive
+operator lock and Terraform locks the local state.
 
 Keep backend configuration, credentials, hostname and allocation identifiers
 outside Git. Initialize the demo with the private backend configuration and

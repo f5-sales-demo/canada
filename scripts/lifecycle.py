@@ -43,6 +43,20 @@ def main():
     lock_path = Path("/data/robin-GIT/.private-task-evidence/canada-topology.lock")
     lock = lock_path.open("a")
     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    backend_text = args.backend_config.read_text()
+    import re
+
+    match = re.fullmatch(r'\s*path\s*=\s*"([^"]+)"\s*', backend_text)
+    if not match:
+        raise ValueError(
+            "local backend config must contain only an absolute state path"
+        )
+    state_path = Path(match.group(1))
+    if not state_path.is_absolute() or state_path.resolve().is_relative_to(root):
+        raise ValueError("local state must be absolute and outside the checkout")
+    state_path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    if state_path.parent.stat().st_mode & 0o077:
+        raise ValueError("local state directory must have mode 0700")
     for file in [args.tfvars, args.backend_config]:
         if file.stat().st_mode & 0o077:
             raise ValueError("private inputs must have mode 0600 or stricter")
