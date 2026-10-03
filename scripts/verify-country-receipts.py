@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """Validate private traffic receipts against XC classification of observed sources."""
 
+# pylint: disable=invalid-name
 # ruff: noqa: EM101, TRY003
 import argparse
 import json
 from pathlib import Path
+from http import HTTPStatus
+
+MINIMUM_SAMPLES = 120
 
 
 def validate(receipt: dict) -> None:
@@ -14,7 +18,7 @@ def validate(receipt: dict) -> None:
     if not receipt.get("source_commit") or not receipt.get("dns_matches_allocation"):
         raise ValueError("source and DNS evidence required")
     canadian = receipt.get("canadian", {})
-    if canadian.get("samples", 0) < 120 or canadian.get("failures") != 0:
+    if canadian.get("samples", 0) < MINIMUM_SAMPLES or canadian.get("failures") != 0:
         raise ValueError("120 successful Canadian requests required")
     if canadian.get("country") != "CA" or not canadian.get("observed_egress"):
         raise ValueError("XC Canadian source classification required")
@@ -38,7 +42,8 @@ def validate(receipt: dict) -> None:
         if {item.get("variant") for item in results} != variants:
             raise ValueError("plain and all spoofed forwarding-header tests required")
         if any(
-            item.get("status") != 403 or not item.get("xc_policy_denial")
+            item.get("status") != HTTPStatus.FORBIDDEN
+            or not item.get("xc_policy_denial")
             for item in results
         ):
             raise ValueError("all negative requests must be denied by XC policy")

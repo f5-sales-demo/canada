@@ -237,7 +237,10 @@ def main() -> int:
             return json.load(response)
 
     allocation = config["allocation"]
-    addresses = {item[4][0] for item in socket.getaddrinfo(config["domain"], 80, type=socket.SOCK_STREAM)}
+    addresses = {
+        item[4][0]
+        for item in socket.getaddrinfo(config["domain"], 80, type=socket.SOCK_STREAM)
+    }
     if addresses != {allocation["ip"]}:
         raise ValueError("public DNS must resolve only to the retained IPv4 allocation")
     objects = collect_configuration(config, get)

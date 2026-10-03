@@ -10,7 +10,8 @@ SPEC = importlib.util.spec_from_file_location(
     "country",
     Path(__file__).resolve().parents[1] / "scripts/verify-country-receipts.py",
 )
-assert SPEC is not None and SPEC.loader is not None
+assert SPEC is not None
+assert SPEC.loader is not None
 module = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(module)
 
