@@ -5,8 +5,8 @@
 # ruff: noqa: EM101, TRY003
 import argparse
 import json
-from pathlib import Path
 from http import HTTPStatus
+from pathlib import Path
 
 MINIMUM_SAMPLES = 120
 
