@@ -330,8 +330,8 @@ module "ce_vm_ca" {
 }
 
 resource "xcsh_namespace" "canada" {
-  name      = "canada-topology"
-  labels    = local.ca_xc_labels
+  name   = "canada-topology"
+  labels = local.ca_xc_labels
 }
 
 resource "xcsh_token" "ce" {

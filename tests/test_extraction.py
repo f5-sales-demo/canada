@@ -25,7 +25,7 @@ class ExtractionTests(unittest.TestCase):
     def test_namespace_omits_parent_metadata(self):
         source = (ROOT / "terraform/main.tf").read_text()
         block = re.search(
-            r'resource "xcsh_namespace" "canada" \{(.*?)\n\}', source, re.S
+            r'resource "xcsh_namespace" "canada" \{(.*?)\n\}', source, re.DOTALL
         )
         assert block is not None
         assert "namespace =" not in re.sub(r"\s+", " ", block.group(1))
