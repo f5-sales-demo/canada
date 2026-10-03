@@ -1,6 +1,8 @@
 ---
 title: Failover
 description: Exercise independent CE and FRR failure and recovery
+sidebar:
+  order: 7
 ---
 
 Run `scripts/verify-azure-failover.sh` with the Terraform directory, private
@@ -18,3 +20,17 @@ Use `internal.canada.f5-sales-demo.ca` for BGP and ILB diagnostics. Verify the
 public `canada.f5-sales-demo.ca` path from a verified Canadian source during each
 failure and recovery as well. Internal-path success alone does not accept the
 public country policy.
+
+## Execute and inspect
+
+```bash
+bash scripts/verify-azure-failover.sh --terraform-dir terraform \
+  --evidence-dir "$CANADA_PRIVATE/failover-receipts" \
+  --subscription "$CANADA_SUBSCRIPTION" --source-commit "$CANADA_SOURCE_COMMIT"
+```
+
+Resolve the subscription from `azure_subscription_id` and source from the clean deployed commit. The command stops owned nodes and restarts
+them; schedule the demonstration in the authorized lab window. Inspect public and internal exact-origin traffic, route withdrawal, changed
+next hops, and restored sessions. Run normal verification after both independent failures.
+
+All current CEs are in Canada Central. This exercise demonstrates node failure and recovery within the deployed region, rather than cross-region redundancy.

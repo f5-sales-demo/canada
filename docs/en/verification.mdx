@@ -1,6 +1,8 @@
 ---
 title: Verification
 description: Verify regional isolation and all Canadian paths
+sidebar:
+  order: 6
 ---
 
 Require three ONLINE CEs, six CE-to-FRR sessions and four FRR-to-Route-Server
@@ -41,3 +43,31 @@ Use `scripts/verify-country-receipts.py` to validate private classification and
 negative-test receipts. It rejects receipts without matching observed egress,
 XC source addresses, country classification and explicit policy-denial evidence
 for every plain and spoofed forwarding-header variant.
+
+## Run the supplied gates
+
+The following commands consume protected state or receipts. Keep their evidence directories outside Git and sanitize results before sharing.
+
+```bash
+python3 scripts/verify-canadian-public-re.py --terraform-dir terraform \
+  --evidence-dir "$CANADA_PRIVATE/public-receipts" --samples 120
+python3 scripts/verify-country-receipts.py "$CANADA_PRIVATE/country-receipt.json"
+python3 scripts/lifecycle.py --mode verify \
+  --tfvars "$CANADA_PRIVATE/canada.tfvars" \
+  --backend-config "$CANADA_PRIVATE/backend.hcl" \
+  --private-root "$CANADA_PRIVATE/verify-receipts"
+```
+
+The public RE verifier validates configuration and exact-origin responses; the country-receipt validator separately requires observed
+egress, matched XC source/classification, 120 Canadian successes, and explicit policy-denial evidence for every negative header variant.
+Prepare that private JSON receipt from actual events; do not infer classification from location.
+
+## Dated evidence
+
+The [v13.0.3 planning repair and verification record](https://github.com/f5-sales-demo/canada-topology/pull/22) was merged on 2026-10-03. It
+pins signed provider/API identity and validates frozen initialization and planning. Earlier [demo-boundary
+evidence](https://github.com/f5-sales-demo/canada-topology/pull/16) describes the public and internal acceptance gates. These records are
+historical evidence for their exact candidates; they do not prove today's live topology. Require a new receipt for the current deployed
+source and every presentation.
+
+The [documentation candidate receipt](../../assets/documentation-acceptance.json) records the local build, generated-route coverage, flag review, and visual checks. Published release and Pages acceptance remain separate gates.

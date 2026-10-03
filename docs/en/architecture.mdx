@@ -1,0 +1,43 @@
+---
+title: Architecture
+description: Follow public delivery and internal routing independently
+sidebar:
+  order: 3
+---
+
+## Three decisions in the public path
+
+```mermaid
+flowchart LR
+  Client[Actual client source] --> DNS[Tenant-managed .ca DNS]
+  DNS --> VIP[Retained public IPv4 allocation]
+  VIP --> RE[Toronto and Montreal REs]
+  RE --> Policy{XC GeoIP COUNTRY_CA}
+  Policy -->|Canada| Pool[Owned Canadian CE origin discovery]
+  Policy -->|Other or unknown| Deny[Default denial]
+  Pool --> CE[Exactly three Canadian CEs]
+  CE --> Origin[Canadian origin]
+  Headers[Forwarding headers] -. trust disabled .-> Policy
+```
+
+The RE virtual site selects exactly `tr2-tor` and `mtl7-mon`. Public traffic uses the retained allocation; the CE origin pool selects only the three owned Canadian sites. The load balancer explicitly selects the owned country policy. Unknown classifications are denied.
+
+## Internal routing and console path
+
+```mermaid
+flowchart LR
+  Client[Owned Canadian client] --> RS[Azure Route Server learned routes]
+  RS --> FRR[Two FRR relays]
+  FRR --> CE[Three Canadian CEs]
+  CE --> App[Internal application VIP]
+  Client --> ILB[Azure internal load balancer]
+  ILB --> CE
+  CE --> Origin[Canadian origin]
+  ILB --> Console[Site Console listener]
+```
+
+The internal diagnostic hostname is separate from public advertisement. Expect six CE-to-FRR and four FRR-to-Route-Server sessions, with both FRR next hops in the client effective routes. The application ILB and console listener use distinct frontend outputs; do not confuse an internal VIP with the retained public allocation.
+
+Origin ingress is the union of provider-published RE/CDN CIDRs, authorized workstation /32s, and exact owned Canadian probe sources. This infrastructure-source allowlist permits origin delivery and diagnostics; public GeoIP authorization applies separately at the public load balancer.
+
+The independent Canada state lives in protected workstation storage. MCN state and the shared Marketplace prerequisite are outside Canada's ownership. See [deployment](../deployment/) for registration phases and [failover](../failover/) for node recovery.

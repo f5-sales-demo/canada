@@ -1,6 +1,8 @@
 ---
 title: Teardown
 description: Destroy only owned Canadian demo resources
+sidebar:
+  order: 9
 ---
 
 Use a reviewed saved destroy plan from the demo root with an exclusive operator
@@ -19,3 +21,16 @@ build healthy with a refresh-enabled zero-change plan.
 MCN retains AWS, Azure US, KVM, its shared registration token, Marketplace
 agreement and S3 backend. Its state must own seven CEs after extraction, while
 Canada Topology owns three.
+
+## Scoped reset command
+
+```bash
+python3 scripts/lifecycle.py --mode destroy \
+  --tfvars "$CANADA_PRIVATE/canada.tfvars" \
+  --backend-config "$CANADA_PRIVATE/backend.hcl" \
+  --private-root "$CANADA_PRIVATE/destroy-receipts"
+```
+
+The lifecycle saves and validates the destroy plan, checks Azure group and XC object absence, and requires the platform allocation to
+remain. `--mode full` performs build, destroy, direct absence, and a second verified build. These modes change owned demo infrastructure;
+use the reviewed inputs and authorized lab window. Never remove the protected state or backups as a documentation cleanup step.

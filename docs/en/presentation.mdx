@@ -1,0 +1,26 @@
+---
+title: Present the demo
+description: Walk through positive and negative Canadian access evidence
+sidebar:
+  order: 5
+---
+
+## Prepare before the audience arrives
+
+Use the exact deployed source commit and a fresh private evidence directory. Complete [verification](../verification/) and confirm the Canadian source's observed egress matches its XC event source and `CA` classification. An Azure region or a VPN label is insufficient. Keep raw source addresses, credentials, and XC events off shared screens.
+
+Open the [architecture](../architecture/) diagram and explain the three controls before showing traffic. Identify the public hostname, retained allocation, exact RE selectees, and owned CE pool from protected outputs.
+
+## Walkthrough
+
+1. **Canadian success.** From a source classified `CA` by XC, show a successful public response matching the Canadian origin control body. Explain that the response proves the tested path, source, and moment. Use the verifier's 120-sample receipt for repeatability.
+2. **Classified non-Canadian denial.** From an authorized test source independently classified outside Canada, show HTTP 403 and the matching XC policy-denial event. Bind the event source to the observed egress.
+3. **Spoofed-header denial.** Repeat from the same non-Canadian source with `X-Forwarded-For`, `Forwarded`, and `X-Real-IP` claiming a Canadian address. Every variant must remain denied. Forwarding-header trust is disabled; header text cannot override actual-source classification.
+4. **Origin identity.** Compare the allowed public body with the direct Canadian origin control body. Show that origin discovery selects exactly the three owned Canadian CEs. Explain the independent infrastructure-source ACL.
+5. **Node failure and recovery.** Rehearse an owned CE failure and an independent FRR failure using [the failover guide](../failover/). Show session withdrawal, changed next hops, exact-origin public and internal traffic, then restoration of the full baseline.
+
+## Close with bounded evidence
+
+Present sanitized counts and outcomes rather than raw logs. Label historical results with their date and source commit. The current deployment is in Canada Central; its node recovery does not prove cross-region redundancy. Hosting and access controls do not establish legal compliance or comprehensive Canadian data residency.
+
+If any gate fails, stop the presentation claim and use [troubleshooting](../troubleshooting/). Do not introduce country-policy exceptions to make a probe pass.

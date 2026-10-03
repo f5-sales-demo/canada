@@ -1,4 +1,4 @@
-SOURCE_ATTRIBUTION.md
+SOURCE_ATTRIBUTION.md -> _SOURCE_ATTRIBUTION.md
 terraform/azure_ilb_xc.tf -> azure_ilb_xc.tf
 terraform/backend.tf -> backend.tf
 terraform/ca_ilb.tf -> ca_ilb.tf

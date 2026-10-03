@@ -1,1 +1,7 @@
-{ "title": "Canada Topology", "description": "Canadian regional F5 Distributed Cloud deployment" }
+{
+  "title": "Canada Topology",
+  "description": "Canadian hosting and regional access control: a sales demo and operator guide for three owned Canadian Customer Edges, Toronto/Montreal advertisement, and actual-source GeoIP authorization.",
+  "promote": ["index", "use-case", "architecture", "presentation"],
+  "demote": ["terraform"],
+  "exclude": ["_data/**"]
+}
