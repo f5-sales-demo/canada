@@ -64,7 +64,7 @@ def validate(plan: dict, mode: str) -> None:
                 == resource["change"].get("after", {}).get(key)
                 for key in set(resource["change"].get("before", {}))
                 | set(resource["change"].get("after", {}))
-                if key not in {"labels", "tags", "description", "input", "output"}
+                if key not in {"labels", "tags", "description"}
             )
             if not application and not provenance:
                 raise ValueError(

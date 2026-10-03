@@ -34,6 +34,7 @@ class CanadianRETests(unittest.TestCase):
             "pool": "canada-pool",
             "loadbalancer": "canada-lb",
             "service_policy": "canada-only",
+            "internal_loadbalancer": "canada-internal",
             "origin_ip": "192.0.2.30",
         }
         self.objects = {
@@ -107,6 +108,22 @@ class CanadianRETests(unittest.TestCase):
             },
         }
 
+        self.objects["internal_loadbalancer"] = {
+            "spec": {
+                "domains": ["internal.canada.f5-sales-demo.ca"],
+                "http": {"dns_volterra_managed": False},
+                "advertise_custom": {
+                    "advertise_where": [
+                        {"site": {"site": {"name": site}}}
+                        for site in self.config["ce_sites"]
+                    ]
+                },
+                "default_route_pools": [
+                    {"pool": {"name": "canada-pool", "namespace": "demo"}}
+                ],
+            }
+        }
+
     def test_reads_regional_selectees_in_allocation_namespace(self):
         routes = []
 
@@ -170,6 +187,19 @@ class CanadianRETests(unittest.TestCase):
             ].update(ip="192.0.2.31"),
             lambda value: value["pool"]["spec"].update(endpoint_selection="LOCAL_ONLY"),
         ]
+        mutations.extend(
+            [
+                lambda value: value["internal_loadbalancer"]["spec"]["http"].update(
+                    dns_volterra_managed=True
+                ),
+                lambda value: value["internal_loadbalancer"]["spec"][
+                    "advertise_custom"
+                ]["advertise_where"].append({"advertise_on_public": {}}),
+                lambda value: value["internal_loadbalancer"]["spec"][
+                    "default_route_pools"
+                ][0]["pool"].update(name="foreign"),
+            ]
+        )
         for mutation in mutations:
             value = copy.deepcopy(self.objects)
             mutation(value)
