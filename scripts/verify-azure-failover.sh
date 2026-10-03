@@ -95,7 +95,21 @@ traffic() {
   result=$(az vm run-command invoke --resource-group "$rg" --name "$client" --command-id RunShellScript \
     --query 'value[0].message' --output tsv --scripts \
     "set -eu; ok=0; for i in \$(seq 1 20); do control=\$(curl -fsS -m 10 'http://${origin}/'); [ -n \"\$control\" ] || exit 1; a=\$(curl -fsS -m 10 --resolve '${domain}:80:${vip}' 'http://${domain}/'); b=\$(curl -fsS -m 10 --resolve '${inside_domain}:80:${ilb}' 'http://${inside_domain}/'); [ \"\$a\" = \"\$control\" ] && [ \"\$b\" = \"\$control\" ] || exit 1; ok=\$((ok+1)); done; timeout 10 bash -c '</dev/tcp/${console_ip}/65500'; echo MCN_FAILOVER_TRAFFIC ok=\$ok") || return 1
-  grep -qF 'MCN_FAILOVER_TRAFFIC ok=20' <<<"$result"
+  grep -qF 'MCN_FAILOVER_TRAFFIC ok=20' <<<"$result" || return 1
+  public_traffic
+}
+
+public_traffic() {
+  local config domain allocation expected body index
+  config=$(tf_json canada_public_re)
+  domain=$(jq -r '.domain' <<<"$config")
+  allocation=$(jq -r '.allocation.ip' <<<"$config")
+  expected=$(jq -r '.expected_marker' <<<"$config")
+  [ "$domain" = "canada.f5-sales-demo.ca" ] && [ "$expected" != null ] || return 1
+  for index in $(seq 1 20); do
+    body=$(curl --noproxy '*' -fsS -m 15 --resolve "${domain}:80:${allocation}" "http://${domain}/") || return 1
+    [ "$body" = "$expected" ] || return 1
+  done
 }
 
 wait_state() {
@@ -128,9 +142,10 @@ run_region() {
   traffic "$rg" "$client" "$domain" "$vip" "$inside_domain" "$ilb" "$console_ip" "$ORIGIN" || die "$region traffic failed during CE stop"
   az vm start --resource-group "$rg" --name "$ce_vm" --only-show-errors >/dev/null
   wait_state "$rg" "$nic" "$vip" "$survivor_vm" "$ce_ips" "$rs_ips" 3 "$frr_ips" || die "$region CE recovery failed"
+  public_traffic || die "$region public traffic failed after recovery"
   recover_vm=""
   jq -n --arg region "$region" --arg commit "$SOURCE_COMMIT" \
-    '{region:$region,source_commit:$commit,stage:"ce",sessions_during_failure:2,traffic_samples:20,exact_origin:true,recovered:true}' \
+    '{region:$region,source_commit:$commit,stage:"ce",sessions_during_failure:2,traffic_samples:20,exact_origin:true,public_samples_during_failure:20,public_samples_after_recovery:20,recovered:true}' \
     >"$EVIDENCE_DIR/${region}-ce.json"
 
   recover_rg=$rg
@@ -140,9 +155,10 @@ run_region() {
   traffic "$rg" "$client" "$domain" "$vip" "$inside_domain" "$ilb" "$console_ip" "$ORIGIN" || die "$region traffic failed during FRR stop"
   az vm start --resource-group "$rg" --name "$frr_vm" --only-show-errors >/dev/null
   wait_state "$rg" "$nic" "$vip" "$frr_vm" "$ce_ips" "$rs_ips" 3 "$frr_ips" || die "$region FRR recovery failed"
+  public_traffic || die "$region public traffic failed after recovery"
   recover_vm=""
   jq -n --arg region "$region" --arg commit "$SOURCE_COMMIT" \
-    '{region:$region,source_commit:$commit,stage:"frr",next_hops_during_failure:1,traffic_samples:20,exact_origin:true,recovered:true}' \
+    '{region:$region,source_commit:$commit,stage:"frr",next_hops_during_failure:1,traffic_samples:20,exact_origin:true,public_samples_during_failure:20,public_samples_after_recovery:20,recovered:true}' \
     >"$EVIDENCE_DIR/${region}-frr.json"
 }
 

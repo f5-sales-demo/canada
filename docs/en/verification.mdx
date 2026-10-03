@@ -36,3 +36,8 @@ objects together. Unavailable live reads or stale rendered documentation fail
 acceptance. Repeat public and internal traffic checks during independent CE and
 FRR failures and after recovery. Publish only sanitized audit and acceptance
 receipts; retain observed source addresses and raw XC events in private evidence.
+
+Use `scripts/verify-country-receipts.py` to validate private classification and
+negative-test receipts. It rejects receipts without matching observed egress,
+XC source addresses, country classification and explicit policy-denial evidence
+for every plain and spoofed forwarding-header variant.
