@@ -1,0 +1,36 @@
+---
+name: Terraform
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: canada-terraform-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    name: Validate Canadian Terraform contracts
+    runs-on: managed-socketless
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Validate graph and frozen provider identities
+        run: |
+          set -euo pipefail
+          test "$(terraform version -json | jq -r .terraform_version)" = 1.16.3
+          terraform -chdir=terraform init -backend=false -input=false -lockfile=readonly
+          terraform -chdir=terraform fmt -check -recursive
+          terraform -chdir=terraform validate -no-color
+          terraform -chdir=terraform test -no-color -var-file=tests/test.auto.tfvars
+          python3 -m unittest discover -s tests
+          bash tests/test-verify-deployment.sh
+      - name: SMSv2 rejection contracts
+        run: |
+          set -euo pipefail
+          terraform -chdir=coverage/smsv2 init -backend=false -input=false -lockfile=readonly
+          terraform -chdir=coverage/smsv2 validate -no-color
+          bash coverage/smsv2/verify.sh

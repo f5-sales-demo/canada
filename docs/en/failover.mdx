@@ -1,0 +1,15 @@
+---
+title: Failover
+description: Exercise independent CE and FRR failure and recovery
+---
+
+Run `scripts/verify-azure-failover.sh` with the Terraform directory, private
+evidence directory, subscription and exact source commit.
+
+The script independently stops one Canadian CE and one FRR, verifies session
+withdrawal and VIP next-hop changes, checks exact-origin traffic during failure,
+and starts the node again. Each recovery must restore the complete baseline.
+A recovery trap starts a stopped node if verification fails.
+
+Reject non-Canadian origin selection and any route outside the owned Canadian
+topology. Repeat normal verification after recovery.

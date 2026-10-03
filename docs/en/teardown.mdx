@@ -1,0 +1,21 @@
+---
+title: Teardown
+description: Destroy only owned Canadian demo resources
+---
+
+Use a reviewed saved destroy plan from the demo root with an exclusive operator
+lock and Terraform's local state lock. Require only owned Canadian demo deletions.
+The protected local state directory and backups remain outside demo teardown.
+
+The application namespace, token, Canadian Azure resources and selector binding
+are owned by this deployment. The reserved public-IP allocation itself must remain
+present in its platform namespace after destroy.
+
+Prove direct absence using Azure and XC reads, then rebuild from the exact clean
+merged main. Never transfer MCN state or manually remove its state entries.
+Complete apply, verify, destroy, direct absence and rebuild; leave the second
+build healthy with a refresh-enabled zero-change plan.
+
+MCN retains AWS, Azure US, KVM, its shared registration token, Marketplace
+agreement and S3 backend. Its state must own seven CEs after extraction, while
+Canada Topology owns three.

@@ -1,0 +1,23 @@
+---
+title: Verification
+description: Verify regional isolation and all Canadian paths
+---
+
+Require three ONLINE CEs, six CE-to-FRR sessions and four FRR-to-Route-Server
+sessions. The client effective-route table must show both FRR next hops for the
+application VIP. Verify Site Console health and valid credentials.
+
+Collect 120 successful exact-origin samples on each VIP and ILB application path.
+Compare every body with the Canadian origin control response. Public traffic must
+use the reserved allocation, Toronto/Montreal selector and Canadian CE origin pool.
+
+Run `scripts/verify-canadian-public-re.py` with the deployed Terraform directory,
+a new private evidence directory and `--samples 120`. It validates selector,
+pool, binding, regional response headers and the exact Canadian origin marker.
+
+Origin ingress must equal the union of all provider-published Regional Edge/CDN
+CIDRs, both workstation /32s and exact owned Canadian probe addresses. Reject
+unlisted ingress. Origin SSH remains disabled.
+
+Finish with a refresh-enabled plan returning exit code zero, no resource actions
+and no output changes. Keep raw evidence private; publish only sanitized receipts.

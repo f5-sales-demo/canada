@@ -1,0 +1,12 @@
+---
+title: Canada Topology
+description: Canadian regional F5 Distributed Cloud deployment
+---
+
+Three Azure Customer Edges in Canada use two FRR relays and Azure Route Server
+to advertise an application VIP. Toronto and Montreal Regional Edges reach an
+origin discovered exclusively through the Canadian CE selector.
+
+Start with [deployment](./deployment/), then [verification](./verification/).
+Exercise [failover](./failover/) and use [teardown](./teardown/) for a scoped reset.
+The [Terraform sources](./terraform/) are included in this site.

@@ -1,0 +1,36 @@
+---
+title: Deployment
+description: Deploy the independent Canadian topology
+---
+
+Use Terraform 1.16.3 and the signed xcsh 12.4.0 provider with API 9.0.2,
+contract 7.0.0 and telemetry v2. Verify the published artifact before initializing.
+
+Accept the Azure Customer Edge Marketplace terms once at subscription scope.
+MCN retains ownership of that shared prerequisite; Canada Topology does not
+duplicate it in its state.
+
+Use the local Terraform backend on the Ubuntu deployment workstation. Keep the
+state and backups outside the checkout in a directory with mode 0700, and keep
+the backend configuration at mode 0600. It contains only an absolute path to the
+independent Canada Topology state file. Local state contains credentials, so use
+the workstation's protected storage and private backup process.
+
+Azure deployment uses the existing local Azure CLI login. No new Blob data role,
+storage key or cloud credential is required. The lifecycle holds an exclusive
+operator lock and Terraform locks the local state.
+
+Keep backend configuration, credentials, hostname and allocation identifiers
+outside Git. Initialize the demo with the private backend configuration and
+`-lockfile=readonly`. Set `source_repository` to `f5-sales-demo/canada-topology`,
+`source_ref` to `refs/heads/main`, and `source_commit_sha` to the exact clean
+merged commit. Supply non-personal owner and actor identifiers.
+
+The demo owns the `canada-topology` application namespace and its dedicated
+registration token. CE sites remain in `system`. The existing reserved public-IP
+allocation stays in its platform namespace; only its selector binding is managed.
+
+Apply the bootstrap phase, wait for all three CE registrations, then plan and
+apply `azure_site_configuration_phase=configured` to bind observed NIC MACs and
+approve registrations. Always save and review the full plan before applying it.
+Canadian resources must remain in Canada Central or Canada East. Bastion is opt-in.
