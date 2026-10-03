@@ -4,6 +4,7 @@
 
 import argparse
 import json
+import re
 from pathlib import Path
 
 ROOTS = {
@@ -66,6 +67,15 @@ def validate(plan: dict, mode: str) -> None:
                 | set(resource["change"].get("after", {}))
                 if key not in {"labels", "tags", "description"}
             )
+            if address == "terraform_data.deployment_guard" and actions == ["update"]:
+                before = resource["change"].get("before", {}).get("input", {})
+                after = resource["change"].get("after", {}).get("input", {})
+                provenance = (
+                    set(after) == {"commit", "tenant"}
+                    and before.get("tenant") == after.get("tenant")
+                    and re.fullmatch(r"[0-9a-f]{40}", after.get("commit", ""))
+                    is not None
+                )
             if not application and not provenance:
                 raise ValueError(
                     "application cutover changes infrastructure: " + address
