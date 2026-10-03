@@ -47,7 +47,7 @@ variables {
   ca_client_vm_name      = null
   ca_region_short        = null
   ca_resource_group_name = null
-  ca_lb_domain           = "canada.example.com"
+  ca_lb_domain           = "canada.f5-sales-demo.ca"
   deployer               = "tester"
   ssh_public_key         = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKzwDqvgRGHaZqbo57o/AxuuqRNPT9MqeYNYsK1Owh8l plan-test-only"
   enable_canada          = true
@@ -95,4 +95,10 @@ run "both_canadian_re_cities_required" {
   command = plan
   variables { ca_re_cities = ["toronto"] }
   expect_failures = [terraform_data.deployment_guard]
+}
+
+run "non_tenant_domain_rejected" {
+  command = plan
+  variables { ca_lb_domain = "canada.example.com" }
+  expect_failures = [var.ca_lb_domain]
 }

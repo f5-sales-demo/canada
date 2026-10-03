@@ -12,6 +12,19 @@ spec.loader.exec_module(module)
 
 
 class ScopeTests(unittest.TestCase):
+    def test_owned_http_loadbalancer_passes(self):
+        module.validate(
+            {
+                "resource_changes": [
+                    {
+                        "address": "xcsh_http_loadbalancer.canada[0]",
+                        "change": {"actions": ["create"]},
+                    }
+                ]
+            },
+            "build",
+        )
+
     def test_foreign_root_rejected(self):
         with self.assertRaisesRegex(ValueError, "foreign resource"):
             module.validate(
