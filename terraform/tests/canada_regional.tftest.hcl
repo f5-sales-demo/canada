@@ -123,13 +123,26 @@ run "canada_regional_virtual_sites_and_lb" {
     error_message = "The Canada showcase HTTP LB must use the delegated Canadian tenant domain."
   }
   assert {
+    condition     = length(xcsh_http_loadbalancer.canada[0].advertise_custom.advertise_where) == 1
+    error_message = "Public application must have exactly one reserved RE advertisement."
+  }
+  assert {
     condition = (
-      length(xcsh_http_loadbalancer.canada[0].advertise_custom.advertise_where) == 7 &&
-      alltrue([for ip in ["10.200.1.4", "10.200.1.5", "10.200.1.6"] : contains([
-        for ad in xcsh_http_loadbalancer.canada[0].advertise_custom.advertise_where : try(ad.site.ip, null)
-      ], ip)])
+      xcsh_service_policy.canada_only[0].allow_list.country_list == tolist(["COUNTRY_CA"]) &&
+      xcsh_service_policy.canada_only[0].allow_list.default_action_deny != null &&
+      xcsh_http_loadbalancer.canada[0].disable_trust_client_ip_headers != null &&
+      one(xcsh_http_loadbalancer.canada[0].active_service_policies.policies).name == xcsh_service_policy.canada_only[0].name
     )
-    error_message = "Regional primary-IP listeners must accompany the three BGP VIP advertisements."
+    error_message = "Public access must explicitly select a Canada-only policy and deny by default."
+  }
+  assert {
+    condition = (
+      xcsh_http_loadbalancer.internal[0].domains == tolist(["internal.canada.f5-sales-demo.ca"]) &&
+      xcsh_http_loadbalancer.internal[0].http.dns_volterra_managed == false &&
+      length(xcsh_http_loadbalancer.internal[0].advertise_custom.advertise_where) == 7 &&
+      alltrue([for ad in xcsh_http_loadbalancer.internal[0].advertise_custom.advertise_where : ad.advertise_on_public == null])
+    )
+    error_message = "All CE and ILB diagnostics must remain internal without public DNS."
   }
 
   assert {
@@ -195,7 +208,7 @@ run "missing_dedicated_allocation_rejected" {
   variables { ca_re_public_ip = null }
   expect_failures = [terraform_data.canada_public_ip_gate]
 }
-run "public_re_disabled_retains_only_ce_listeners" {
+run "public_re_disabled_has_no_public_listeners" {
   command = plan
   variables {
     enable_canada_public_re = false
@@ -204,8 +217,24 @@ run "public_re_disabled_retains_only_ce_listeners" {
   assert {
     condition = (
       length(xcsh_public_ip_binding.canada) == 0 &&
-      length(xcsh_http_loadbalancer.canada[0].advertise_custom.advertise_where) == 6
+      length(xcsh_http_loadbalancer.canada) == 0
     )
-    error_message = "Unallocated deployments retain CE listeners and must not advertise on all REs."
+    error_message = "Unallocated public applications must never advertise on CEs or all REs."
   }
+}
+
+run "legacy_hostname_rejected" {
+  command = plan
+  variables { ca_lb_domain = "mcn-ce-ha.f5-sales-demo.ca" }
+  expect_failures = [var.ca_lb_domain]
+}
+run "non_canadian_placement_rejected" {
+  command = plan
+  variables { ca_location = "eastus" }
+  expect_failures = [var.ca_location]
+}
+run "incomplete_re_selector_rejected" {
+  command = plan
+  variables { ca_re_cities = ["toronto"] }
+  expect_failures = [terraform_data.deployment_guard]
 }

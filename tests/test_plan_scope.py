@@ -76,6 +76,44 @@ class ScopeTests(unittest.TestCase):
             "destroy",
         )
 
+    def test_application_cutover_rejects_infrastructure_replacement(self):
+        for address in [
+            "module.ce_vm_ca.azurerm_linux_virtual_machine.this",
+            "module.showcase_origin_ca.azurerm_linux_virtual_machine.this",
+            "module.azure_frr_ca.azurerm_linux_virtual_machine.this",
+            "xcsh_public_ip_binding.canada[0]",
+        ]:
+            with self.assertRaises(ValueError):
+                module.validate(
+                    {
+                        "resource_changes": [
+                            {
+                                "address": address,
+                                "change": {"actions": ["delete", "create"]},
+                            }
+                        ]
+                    },
+                    "application",
+                )
+
+    def test_application_cutover_rejects_infrastructure_update(self):
+        with self.assertRaises(ValueError):
+            module.validate(
+                {
+                    "resource_changes": [
+                        {
+                            "address": "xcsh_public_ip_binding.canada[0]",
+                            "change": {
+                                "actions": ["update"],
+                                "before": {"expected_ip": "192.0.2.1"},
+                                "after": {"expected_ip": "192.0.2.2"},
+                            },
+                        }
+                    ]
+                },
+                "application",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

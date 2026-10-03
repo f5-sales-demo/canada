@@ -20,7 +20,7 @@ Azure deployment uses the existing local Azure CLI login. No new Blob data role,
 storage key or cloud credential is required. The lifecycle holds an exclusive
 operator lock and Terraform locks the local state.
 
-Keep backend configuration, credentials, hostname and allocation identifiers
+Keep backend configuration, credentials and allocation identifiers
 outside Git. Initialize the demo with the private backend configuration and
 `-lockfile=readonly`. Set `source_repository` to `f5-sales-demo/canada-topology`,
 `source_ref` to `refs/heads/main`, and `source_commit_sha` to the exact clean
@@ -35,5 +35,20 @@ apply `azure_site_configuration_phase=configured` to bind observed NIC MACs and
 approve registrations. Always save and review the full plan before applying it.
 Canadian resources must remain in Canada Central or Canada East. Bastion is opt-in.
 
-The public hostname must be under the tenant's configured Canadian domain
-`f5-sales-demo.ca`. Preserve the existing private hostname during cutover.
+The public hostname must be exactly `canada.f5-sales-demo.ca`, published through
+existing tenant-managed `.ca` DNS to the retained allocation. Remove the former
+public hostname only after the exact hostname resolves and Canadian requests pass.
+Keep public IPv6 unpublished. Public advertisement has only the reserved RE VIP;
+CE BGP, primary-IP and ILB listeners use `internal.canada.f5-sales-demo.ca`, with
+no public advertisement or managed public DNS.
+
+The public load balancer explicitly selects the owned service policy with
+`allow_list.country_list = ["COUNTRY_CA"]` and `default_action_deny = {}`.
+Do not add IP, ASN, workstation, probe, unknown-country or inherited-policy
+exceptions. Keep `disable_trust_client_ip_headers` enabled.
+
+Save a refresh-enabled plan and review it with `scripts/plan_scope.py --mode
+application`. Application and policy changes and provenance updates are allowed;
+CE, origin, FRR, Route Server and reserved-allocation replacement are rejected.
+Keep the existing Canada Central deployment; Canada East remains an allowed
+placement, and cross-region CE distribution is outside this change.

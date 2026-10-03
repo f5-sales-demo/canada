@@ -226,12 +226,12 @@ resource "terraform_data" "canada_public_ip_gate" {
 }
 
 resource "xcsh_http_loadbalancer" "canada" {
-  count      = var.enable_azure && var.enable_canada ? 1 : 0
+  count      = var.enable_azure && var.enable_canada && var.enable_canada_public_re ? 1 : 0
   depends_on = [module.xc_site_ca, xcsh_virtual_site.canada_re, xcsh_virtual_site.canada_ce, terraform_data.canada_public_ip_gate]
 
   name         = local.ca_lb_name
   namespace    = xcsh_namespace.canada.name
-  description  = "Canada Regional HA: custom VIP ${var.ca_vip} advertised strictly via Canadian Regional Edges (Toronto and Montreal) and Canadian CEs."
+  description  = "Canada-only public application through Toronto and Montreal Regional Edges."
   labels       = local.ca_xc_labels
   add_location = var.enable_canada_public_re
 
@@ -256,6 +256,59 @@ resource "xcsh_http_loadbalancer" "canada" {
       }
     }
 
+
+  }
+
+  default_route_pools {
+    pool {
+      namespace = xcsh_namespace.canada.name
+      name      = try(xcsh_origin_pool.canada[0].name, null)
+    }
+    weight   = 1
+    priority = 1
+  }
+
+  round_robin            = {}
+  no_challenge           = {}
+  user_id_client_ip      = {}
+  disable_waf            = {}
+  disable_rate_limit     = {}
+  disable_api_discovery  = {}
+  disable_api_testing    = {}
+  disable_api_definition = {}
+  l7_ddos_protection {}
+  active_service_policies {
+    policies {
+      name      = xcsh_service_policy.canada_only[0].name
+      namespace = xcsh_namespace.canada.name
+    }
+  }
+  disable_trust_client_ip_headers  = {}
+  disable_malicious_user_detection = {}
+  disable_malware_protection       = {}
+  disable_threat_mesh              = {}
+  default_sensitive_data_policy    = {}
+}
+
+
+resource "xcsh_http_loadbalancer" "internal" {
+  count      = var.enable_azure && var.enable_canada ? 1 : 0
+  depends_on = [module.xc_site_ca, xcsh_virtual_site.canada_re, xcsh_virtual_site.canada_ce, terraform_data.canada_public_ip_gate]
+
+  name         = "${local.ca_lb_name}-internal"
+  namespace    = xcsh_namespace.canada.name
+  description  = "Internal Canadian BGP, primary-IP and ILB diagnostics."
+  labels       = local.ca_xc_labels
+  add_location = false
+
+  domains = ["internal.canada.f5-sales-demo.ca"]
+
+  http {
+    dns_volterra_managed = false
+    port                 = 80
+  }
+
+  advertise_custom {
     dynamic "advertise_where" {
       for_each = try(module.ce_topology_ca[0].ce_nodes, {})
       content {
@@ -285,6 +338,20 @@ resource "xcsh_http_loadbalancer" "canada" {
         use_default_port = {}
       }
     }
+    dynamic "advertise_where" {
+      for_each = var.enable_canada_ilb ? [1] : []
+      content {
+        port = 80
+        virtual_site_with_vip {
+          ip      = cidrhost(var.ca_internal_subnet_prefix, 10)
+          network = "SITE_NETWORK_SPECIFIED_VIP_INSIDE"
+          virtual_site {
+            name      = xcsh_virtual_site.canada_ce[0].name
+            namespace = xcsh_namespace.canada.name
+          }
+        }
+      }
+    }
   }
 
   default_route_pools {
@@ -305,7 +372,7 @@ resource "xcsh_http_loadbalancer" "canada" {
   disable_api_testing    = {}
   disable_api_definition = {}
   l7_ddos_protection {}
-  service_policies_from_namespace  = {}
+  no_service_policies              = {}
   disable_trust_client_ip_headers  = {}
   disable_malicious_user_detection = {}
   disable_malware_protection       = {}
@@ -376,5 +443,18 @@ data "external" "xc_env_tenant" {
       condition     = contains(["", var.expected_xc_tenant], self.result.tenant)
       error_message = "Ambient XC API URL does not match the expected deployment tenant."
     }
+  }
+}
+
+resource "xcsh_service_policy" "canada_only" {
+  count       = var.enable_azure && var.enable_canada ? 1 : 0
+  name        = "${local.ca_lb_name}-canada-only"
+  namespace   = xcsh_namespace.canada.name
+  description = "Allow actual source IPv4 addresses classified by XC GeoIP as Canada; deny all others."
+  labels      = local.ca_xc_labels
+  any_server  = {}
+  allow_list {
+    country_list        = ["COUNTRY_CA"]
+    default_action_deny = {}
   }
 }

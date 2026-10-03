@@ -7,18 +7,21 @@ import argparse
 import json
 import os
 import shutil
+import socket
 import subprocess
 import urllib.request
 from pathlib import Path
 from typing import Any
 
-LISTENER_COUNT = 7
+LISTENER_COUNT = 1
 ALLOWED_RE = {"tr2-tor", "mtl7-mon"}
 SELECTOR = ["ves.io/region in (ves-io-toronto, ves-io-montreal)"]
 
 
 def validate_configuration(config: dict[str, Any], objects: dict[str, Any]) -> None:
     """Reject a broader binding, advertisement, endpoint or discovery scope."""
+    if config["domain"] != "canada.f5-sales-demo.ca":
+        raise ValueError("public hostname must be exactly canada.f5-sales-demo.ca")
     allocation = config["allocation"]
     public = objects["public_ip"]
     if public["spec"]["ip"] != allocation["ip"]:
@@ -54,13 +57,10 @@ def validate_configuration(config: dict[str, Any], objects: dict[str, Any]) -> N
         or public_ads[0]["public_ip"].get("namespace") != allocation["namespace"]
     ):
         raise ValueError("load balancer must use only the reserved public IP")
-    if len(ads) != LISTENER_COUNT or any(
-        "site" not in ad
-        or ad["site"].get("site", {}).get("name") not in config["ce_sites"]
-        for ad in ads
-        if "advertise_on_public" not in ad
-    ):
-        raise ValueError("nonpublic listeners must belong only to Canadian CEs")
+    if len(ads) != LISTENER_COUNT:
+        raise ValueError("public application must have only one RE listener")
+    validate_policy(config, objects)
+    validate_internal(config, objects)
     pools = lb.get("default_route_pools", [])
     if len(pools) != 1 or (
         pools[0].get("pool", {}).get("name"),
@@ -78,6 +78,87 @@ def validate_configuration(config: dict[str, Any], objects: dict[str, Any]) -> N
         locator.get("namespace"),
     ) != (config["ce_virtual_site"], config["namespace"]):
         raise ValueError("origin discovery is not restricted to the Canadian pool")
+
+
+def validate_internal(config: dict[str, Any], objects: dict[str, Any]) -> None:
+    """Reject public DNS, advertisement or foreign origins on diagnostics."""
+    lb = objects["internal_loadbalancer"]["spec"]
+    if lb.get("domains") != ["internal.canada.f5-sales-demo.ca"] or lb.get(
+        "http", {}
+    ).get("dns_volterra_managed"):
+        raise ValueError("diagnostics require the internal hostname without public DNS")
+    ads = lb.get("advertise_custom", {}).get("advertise_where", [])
+    if not ads or any("advertise_on_public" in ad for ad in ads):
+        raise ValueError("diagnostics must never advertise publicly")
+    for ad in ads:
+        if "site" in ad:
+            if ad["site"].get("site", {}).get("name") not in config["ce_sites"]:
+                raise ValueError("diagnostic site must be an owned Canadian CE")
+        elif "virtual_site_with_vip" in ad:
+            site = ad["virtual_site_with_vip"].get("virtual_site", {})
+            if (site.get("name"), site.get("namespace")) != (
+                config["ce_virtual_site"],
+                config["namespace"],
+            ):
+                raise ValueError(
+                    "diagnostic selector must be the owned Canadian CE selector"
+                )
+        else:
+            raise ValueError("unknown diagnostic advertisement")
+    pools = lb.get("default_route_pools", [])
+    if len(pools) != 1 or (
+        pools[0].get("pool", {}).get("name"),
+        pools[0].get("pool", {}).get("namespace"),
+    ) != (config["pool"], config["namespace"]):
+        raise ValueError("diagnostics must use only the Canadian origin")
+
+
+def validate_policy(config: dict[str, Any], objects: dict[str, Any]) -> None:
+    """Require an explicitly selected, unmodified Canada-only country policy."""
+    lb = objects["loadbalancer"]["spec"]
+    if lb.get("disable_trust_client_ip_headers") != {} or any(
+        lb.get(key) not in (None, [])
+        for key in [
+            "service_policies_from_namespace",
+            "no_service_policies",
+            "trusted_clients",
+            "enable_trust_client_ip_headers",
+        ]
+    ):
+        raise ValueError(
+            "public client policy must not inherit or trust forwarding headers"
+        )
+    policies = lb.get("active_service_policies", {}).get("policies", [])
+    if len(policies) != 1 or (
+        policies[0].get("name"),
+        policies[0].get("namespace"),
+    ) != (config["service_policy"], config["namespace"]):
+        raise ValueError("explicit Canada-only service policy attachment differs")
+    policy = objects["service_policy"]["spec"]
+    allow = policy.get("allow_list", {})
+    if (
+        policy.get("disable")
+        or allow.get("country_list") != ["COUNTRY_CA"]
+        or allow.get("default_action_deny") != {}
+        or policy.get("any_server") != {}
+    ):
+        raise ValueError("Canada-only country allow list with default denial required")
+    if any(
+        value not in (None, [], {})
+        for key, value in allow.items()
+        if key not in ["country_list", "default_action_deny"]
+    ):
+        raise ValueError("country policy must have no exceptions")
+    if any(
+        allow.get(key) is not None
+        for key in ["default_action_allow", "default_action_next_policy"]
+    ):
+        raise ValueError("country policy must deny by default")
+    if any(
+        policy.get(key) is not None
+        for key in ["allow_all_requests", "deny_list", "rule_list"]
+    ):
+        raise ValueError("country policy must not contain alternate rules")
 
 
 def validate_response(body: bytes, headers: str, expected: str) -> str:
@@ -110,6 +191,10 @@ def collect_configuration(config: dict[str, Any], get: Any) -> dict[str, Any]:
             namespace, "virtual_sites", config["ce_virtual_site"], "/selectees"
         ),
         "pool": get(namespace, "origin_pools", config["pool"]),
+        "service_policy": get(namespace, "service_policys", config["service_policy"]),
+        "internal_loadbalancer": get(
+            namespace, "http_loadbalancers", config["internal_loadbalancer"]
+        ),
     }
 
 
@@ -118,7 +203,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--terraform-dir", required=True)
     parser.add_argument("--evidence-dir", type=Path, required=True)
-    parser.add_argument("--samples", type=int, default=10)
+    parser.add_argument("--samples", type=int, default=120)
     args = parser.parse_args()
     config = json.loads(
         subprocess.check_output(  # noqa: S603 - fixed Terraform output operation and argv
@@ -152,6 +237,12 @@ def main() -> int:
             return json.load(response)
 
     allocation = config["allocation"]
+    addresses = {
+        item[4][0]
+        for item in socket.getaddrinfo(config["domain"], 80, type=socket.SOCK_STREAM)
+    }
+    if addresses != {allocation["ip"]}:
+        raise ValueError("public DNS must resolve only to the retained IPv4 allocation")
     objects = collect_configuration(config, get)
     (args.evidence_dir / "configuration.json").write_text(json.dumps(objects))
     validate_configuration(config, objects)

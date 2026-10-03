@@ -68,7 +68,7 @@ case "${1:-} ${2:-} ${3:-}" in
 "output -raw azure_ilb_application_domain") printf 'mcn-inside.example.com\n' ;;
 "output -raw canada_ilb_application_domain") printf 'mcn-ca-inside.example.com\n' ;;
 "output -raw lb_domain") printf 'mcn.example.com\n' ;;
-"output -raw ca_lb_domain") printf 'mcn-ca.example.com\n' ;;
+"output -raw canada_internal_application_domain") printf 'mcn-ca.example.com\n' ;;
 "output -raw vip") printf '10.250.0.10\n' ;;
 "output -raw ca_vip") printf '10.250.1.10\n' ;;
 "output -raw client_nic_name") printf 'client-us-nic\n' ;;
