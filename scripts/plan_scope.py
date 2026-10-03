@@ -1,7 +1,10 @@
 """Validate the complete saved-plan ownership and action boundary."""
 
+# ruff: noqa: TRY003, EM101
+
 import argparse
 import json
+from pathlib import Path
 
 ROOTS = {
     "module.azure_hub_ca",
@@ -33,7 +36,7 @@ ROOTS = {
 }
 
 
-def validate(plan, mode):
+def validate(plan: dict, mode: str) -> None:
     """Reject foreign managed objects and inappropriate actions."""
     for resource in plan.get("resource_changes", []):
         actions = resource["change"]["actions"]
@@ -61,6 +64,6 @@ if __name__ == "__main__":
     parser.add_argument("plan")
     parser.add_argument("--mode", choices=["build", "destroy", "zero"], required=True)
     args = parser.parse_args()
-    with open(args.plan, encoding="utf-8") as source:
+    with Path(args.plan).open(encoding="utf-8") as source:
         validate(json.load(source), args.mode)
     print("PASS: Canadian saved-plan scope " + args.mode)

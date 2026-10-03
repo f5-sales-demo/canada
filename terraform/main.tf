@@ -345,7 +345,7 @@ resource "xcsh_token" "ce" {
 }
 
 resource "terraform_data" "deployment_guard" {
-  input = var.source_commit_sha
+  input = { commit = var.source_commit_sha, tenant = data.external.xc_env_tenant.result.tenant }
   lifecycle {
     precondition {
       condition     = !var.enable_canada || (var.enable_azure && var.ca_ce_count == 3)

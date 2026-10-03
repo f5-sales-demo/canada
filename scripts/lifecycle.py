@@ -1,26 +1,34 @@
 """Run saved-plan Canadian lifecycle stages from an exact clean merged checkout."""
 
+# pylint: disable=too-many-statements,consider-using-with
+# ruff: noqa: TRY003, EM101, S603, S310
+
 import argparse
 import fcntl
 import hashlib
 import json
 import os
+import re
 import subprocess
 import time
 import urllib.error
 import urllib.request
+from http import HTTPStatus
 from pathlib import Path
+from typing import Any
 
 from plan_scope import validate
 
 REPOSITORY = "f5-sales-demo/canada-topology"
 
 
-def run(argv, cwd, **kwargs):
-    return subprocess.check_output(argv, cwd=cwd, text=True, **kwargs)
+def run(argv: list[str], cwd: Path) -> str:
+    """Run a fixed executable with exact argument transport."""
+    return subprocess.check_output(argv, cwd=cwd, text=True)
 
 
-def main():
+def main() -> None:
+    """Execute the selected scoped lifecycle with private state and receipts."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--mode", choices=["build", "verify", "destroy", "full"], required=True
@@ -44,7 +52,6 @@ def main():
     lock = lock_path.open("a")
     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     backend_text = args.backend_config.read_text()
-    import re
 
     match = re.fullmatch(r'\s*path\s*=\s*"([^"]+)"\s*', backend_text)
     if not match:
@@ -71,8 +78,8 @@ def main():
     )
     tf = ["terraform", "-chdir=" + str(root / "terraform")]
     run(
-        tf
-        + [
+        [
+            *tf,
             "init",
             "-input=false",
             "-lockfile=readonly",
@@ -90,22 +97,25 @@ def main():
         "-var=source_commit_sha=" + sha,
     ]
 
-    def output(name):
-        return json.loads(run(tf + ["output", "-json", name], root))
+    def output(name: str) -> Any:
+        return json.loads(run([*tf, "output", "-json", name], root))
 
-    def saved(stage, mode, phase="configured", apply=True):
+    def saved(
+        stage: str, mode: str, phase: str = "configured", apply: bool = True
+    ) -> None:
         plan = args.private_root / (stage + ".tfplan")
-        cmd = (
-            tf
-            + ["plan"]
-            + common
-            + ["-var=azure_site_configuration_phase=" + phase, "-out=" + str(plan)]
-        )
+        cmd = [
+            *tf,
+            "plan",
+            *common,
+            "-var=azure_site_configuration_phase=" + phase,
+            "-out=" + str(plan),
+        ]
         if mode == "destroy":
             cmd.append("-destroy")
         with (args.private_root / (stage + ".log")).open("w") as log:
             subprocess.run(cmd, cwd=root, stdout=log, stderr=log, check=True)
-        data = json.loads(run(tf + ["show", "-json", str(plan)], root))
+        data = json.loads(run([*tf, "show", "-json", str(plan)], root))
         validate(data, mode)
         digest = hashlib.sha256(plan.read_bytes()).hexdigest()
         (args.private_root / (stage + "-review.json")).write_text(
@@ -118,14 +128,14 @@ def main():
                 raise ValueError("saved plan changed after review")
             with (args.private_root / (stage + "-apply.log")).open("w") as log:
                 subprocess.run(
-                    tf + ["apply", "-input=false", str(plan)],
+                    [*tf, "apply", "-input=false", str(plan)],
                     cwd=root,
                     stdout=log,
                     stderr=log,
                     check=True,
                 )
 
-    def get(namespace, kind, name):
+    def get(namespace: str, kind: str, name: str) -> Any:
         base = os.environ["XCSH_API_URL"]
         if not base.startswith("https://"):
             raise ValueError("XC API must use HTTPS")
@@ -136,7 +146,7 @@ def main():
         with urllib.request.urlopen(request, timeout=60) as response:
             return json.load(response)
 
-    def verify(stage):
+    def verify(stage: str) -> None:
         identity = output("deployment_identity")
         if identity["repository"] != REPOSITORY or identity["source_commit"] != sha:
             raise ValueError("deployed provenance does not match exact merged source")
@@ -191,7 +201,7 @@ def main():
         )
         saved(stage + "-zero", "zero", apply=False)
 
-    def build(stage):
+    def build(stage: str) -> None:
         saved(stage + "-bootstrap", "build", "bootstrap")
         # Registration and the immutable MAC mapping can lag guest boot.
         deadline = time.monotonic() + 5400
@@ -216,7 +226,7 @@ def main():
             time.sleep(30)
         verify(stage)
 
-    def destroy(stage):
+    def destroy(stage: str) -> None:
         inventory = {
             "group": output("ca_resource_group_name"),
             "sites": list(output("ca_xc_site_names").values()),
@@ -253,7 +263,7 @@ def main():
             try:
                 get("system", "sites", site)
             except urllib.error.HTTPError as error:
-                if error.code != 404:
+                if error.code != HTTPStatus.NOT_FOUND:
                     raise
             else:
                 raise ValueError("Canadian XC site remains after destroy")
@@ -261,7 +271,7 @@ def main():
             try:
                 get(inventory["app_namespace"], kind, name)
             except urllib.error.HTTPError as error:
-                if error.code != 404:
+                if error.code != HTTPStatus.NOT_FOUND:
                     raise
             else:
                 raise ValueError("Canadian application object remains after destroy")
