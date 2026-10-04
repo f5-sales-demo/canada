@@ -11,7 +11,7 @@ class ExtractionTests(unittest.TestCase):
         source = "\n".join(p.read_text() for p in terraform.glob("*.tf"))
         assert 'resource "xcsh_namespace" "canada"' in source
         assert 'backend "local"' in source
-        assert "f5-sales-demo/canada-topology" in source
+        assert "f5-sales-demo/canada" in source
         assert "f5-sales-demo/multi-cloud-networking" not in source
         assert 'provider "aws"' not in source
         assert 'data "terraform_remote_state"' not in source
@@ -28,6 +28,7 @@ class ExtractionTests(unittest.TestCase):
             r'resource "xcsh_namespace" "canada" \{(.*?)\n\}', source, re.DOTALL
         )
         assert block is not None
+        assert 'name   = "canada"' in block.group(1)
         assert "namespace =" not in re.sub(r"\s+", " ", block.group(1))
 
     def test_module_closure_is_local(self):

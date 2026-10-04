@@ -3,7 +3,10 @@ locals {
 
   source_branch = trimprefix(var.source_ref, "refs/heads/")
 
-  source_ref_sha256 = sha256("${local.deployment_identity_schema}\u0000${var.source_repository}\u0000${var.source_ref}")
+  # Repository renames must not rotate immutable token labels or CE boot inputs.
+  # Preserve the original deployment identity salt while publishing current provenance.
+  deployment_identity_repository = "f5-sales-demo/canada-topology"
+  source_ref_sha256              = sha256("${local.deployment_identity_schema}\u0000${local.deployment_identity_repository}\u0000${var.source_ref}")
 
   source_branch_slug_raw = trim(replace(lower(local.source_branch), "/[^a-z0-9]+/", "-"), "-")
 
@@ -82,7 +85,7 @@ locals {
     deployer                 = local.deployer
     managed_by               = "terraform"
     canada_environment       = local.deployment_environment_key
-    canada_repository        = "canada-topology"
+    canada_repository        = "canada"
     canada_source_ref_sha256 = local.source_ref_sha256
     canada_source_commit     = var.source_commit_sha
     canada_owner_id          = var.deployment_owner_id

@@ -1,4 +1,4 @@
-source_repository      = "f5-sales-demo/canada-topology"
+source_repository      = "f5-sales-demo/canada"
 source_ref             = "refs/heads/main"
 source_commit_sha      = "1111111111111111111111111111111111111111"
 deployment_owner_id    = "showcase-team"

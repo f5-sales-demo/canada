@@ -398,7 +398,7 @@ module "ce_vm_ca" {
 }
 
 resource "xcsh_namespace" "canada" {
-  name   = "canada-topology"
+  name   = "canada"
   labels = local.ca_xc_labels
 }
 
