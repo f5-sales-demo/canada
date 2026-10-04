@@ -170,10 +170,9 @@ class NamespaceMigrationTests(unittest.TestCase):
 
 class CeReadbackNormalizationTests(unittest.TestCase):
     def test_false_flags_equal_omitted_flags(self):
-        self.assertEqual(
-            module.normalize_ce_readback({"is_primary": False, "mac": "synthetic"}),
-            {"mac": "synthetic"},
-        )
-        self.assertEqual(
-            module.normalize_ce_readback({"is_primary": True}), {"is_primary": True}
-        )
+        assert module.normalize_ce_readback(
+            {"is_primary": False, "mac": "synthetic"}
+        ) == {"mac": "synthetic"}
+        assert module.normalize_ce_readback({"is_primary": True}) == {
+            "is_primary": True
+        }

@@ -6,6 +6,7 @@ import argparse
 import json
 import re
 from pathlib import Path
+from typing import Any
 
 ROOTS = {
     "module.azure_hub_ca",
@@ -40,7 +41,7 @@ ROOTS = {
 }
 
 
-def normalize_ce_readback(value):
+def normalize_ce_readback(value: Any) -> Any:
     """Ignore only omitted false interface flags returned by XC."""
     if isinstance(value, dict):
         return {
