@@ -1,8 +1,8 @@
 {
   "schema_version": 2,
   "date": "2026-10-04",
-  "status": "released-artifact-validation-passed",
-  "scope": "Canada use-case documentation on verified released builder; published Pages acceptance follows content merge",
+  "status": "published-acceptance-passed",
+  "scope": "Published Canada use-case documentation, verified released artifacts and core managed blobs",
   "authored_pages": 10,
   "source_sha256": {
     "docs/en/architecture.mdx": "92bf43e53086fa9804e800b6683868d9686687b6a023e09b9987444d02fe6b6a",
@@ -92,7 +92,17 @@
     "artifact": "ghcr.io/f5-sales-demo/docs-builder@sha256:cae5f5b5498aeefaff89587d3f9847a6b2904139a45f680a9012235e2a42643f"
   },
   "lint_privacy": "passed",
-  "published_acceptance": "pending content merge and Pages workflow",
+  "published_acceptance": {
+    "status": "passed",
+    "source_commit": "bc3a2c601f75913c2162ba592a5262a03484490e",
+    "builder_image": "ghcr.io/f5-sales-demo/docs-builder@sha256:cae5f5b5498aeefaff89587d3f9847a6b2904139a45f680a9012235e2a42643f",
+    "pages_workflow": "https://github.com/f5-sales-demo/canada/actions/runs/37221559025",
+    "verified_endpoints": 31,
+    "llm_article_priority": "passed",
+    "desktop_mobile_light_dark_traversals": 40,
+    "browser_errors": [],
+    "failed_responses": []
+  },
   "infrastructure_changes": false,
   "delivery_authorization": "User directs linked issues, closing references, green CI and workflow delivery without a separate acceptance gate",
   "builder": {
@@ -111,5 +121,36 @@
     "tarball": "https://registry.npmjs.org/@f5-sales-demo/docs-theme/-/docs-theme-4.8.0.tgz",
     "registry_download_verified": true,
     "workflow": "https://github.com/f5-sales-demo/docs-theme/actions/runs/37218790947"
+  },
+  "managed_blob_receipts": {
+    "status": "passed",
+    "manifest_source": "2ac2069fb14368b3b0b4c137be633c2c3ac7f121",
+    "manifest_head": "4cbbeb8afbdd07e32504a96360ffe66bbcdf904f",
+    "checks": [
+      {
+        "repository": "canada",
+        "path": ".github/workflows/github-pages-deploy.yml",
+        "blob": "6accaf8a107f625285f5ae173b342fea606d888a",
+        "manifest_match": true
+      },
+      {
+        "repository": "multi-cloud-networking",
+        "path": ".github/workflows/github-pages-deploy.yml",
+        "blob": "6accaf8a107f625285f5ae173b342fea606d888a",
+        "manifest_match": true
+      },
+      {
+        "repository": "canada",
+        "path": "README.md",
+        "blob": "b6c67a3899d32c9f9d271274a66f727d24c24ee2",
+        "manifest_match": true
+      },
+      {
+        "repository": "multi-cloud-networking",
+        "path": "README.md",
+        "blob": "b6c67a3899d32c9f9d271274a66f727d24c24ee2",
+        "manifest_match": true
+      }
+    ]
   }
 }
