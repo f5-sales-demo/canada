@@ -24,11 +24,11 @@ operator lock and Terraform locks the local state.
 
 Keep backend configuration, credentials and allocation identifiers
 outside Git. Initialize the demo with the private backend configuration and
-`-lockfile=readonly`. Set `source_repository` to `f5-sales-demo/canada-topology`,
+`-lockfile=readonly`. Set `source_repository` to `f5-sales-demo/canada`,
 `source_ref` to `refs/heads/main`, and `source_commit_sha` to the exact clean
 merged commit. Supply non-personal owner and actor identifiers.
 
-The demo owns the `canada-topology` application namespace and its dedicated
+The demo owns the `canada` application namespace and its dedicated
 registration token. CE sites remain in `system`. The existing reserved public-IP
 allocation stays in its platform namespace; only its selector binding is managed.
 
