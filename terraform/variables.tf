@@ -408,8 +408,8 @@ variable "source_repository" {
   type        = string
 
   validation {
-    condition     = var.source_repository == "f5-sales-demo/canada-topology"
-    error_message = "source_repository must be exactly f5-sales-demo/canada-topology."
+    condition     = var.source_repository == "f5-sales-demo/canada"
+    error_message = "source_repository must be exactly f5-sales-demo/canada."
   }
 }
 
