@@ -1,27 +1,21 @@
 ---
-title: Failover
-description: Exercise independent CE and FRR failure and recovery
+title: Recovery behavior
+description: Understand the Canada Central CE and FRR node recovery exercise
 sidebar:
   order: 7
 ---
 
-Run `scripts/verify-azure-failover.sh` with the Terraform directory, private
-evidence directory, subscription and exact source commit.
+The demonstration exercises one owned CE failure and one independent FRR relay failure, restoring each node before the next exercise. All three CEs are deployed in Canada Central. This tests node withdrawal and recovery within that region; Canada East is an allowed source input, not a second deployed recovery region.
 
-The script independently stops one Canadian CE and one FRR, verifies session
-withdrawal and VIP next-hop changes, checks exact-origin traffic during failure,
-and starts the node again. Each recovery must restore the complete baseline.
-A recovery trap starts a stopped node if verification fails.
+A CE stop withdraws that node's paths. An FRR stop removes one relay next hop from the client route. Surviving routes carry the internal application path, while the public path still depends on the reserved RE allocation, country policy and Canadian origin pool. After restart, the expected six CE-to-FRR and four FRR-to-Route-Server sessions and both relay next hops return.
 
-Reject non-Canadian origin selection and any route outside the owned Canadian
-topology. Repeat normal verification after recovery.
+The useful observations are route withdrawal, changed next hops, expected-origin traffic during the interruption, and restored sessions. Internal success alone does not establish
+public country authorization. Public success must be observed from an XC-classified Canadian source. The [article's checks](../use-case/#checking-the-controls) put these results
+alongside the other controls.
 
-Use `internal.canada.f5-sales-demo.ca` for BGP and ILB diagnostics. Verify the
-public `canada.f5-sales-demo.ca` path from a verified Canadian source during each
-failure and recovery as well. Internal-path success alone does not accept the
-public country policy.
+## Supplied exercise
 
-## Execute and inspect
+The existing verifier stops and restarts owned nodes, using the subscription and exact deployed source commit from protected inputs. It is an infrastructure-changing lab exercise.
 
 ```bash
 bash scripts/verify-azure-failover.sh --terraform-dir terraform \
@@ -29,8 +23,4 @@ bash scripts/verify-azure-failover.sh --terraform-dir terraform \
   --subscription "$CANADA_SUBSCRIPTION" --source-commit "$CANADA_SOURCE_COMMIT"
 ```
 
-Resolve the subscription from `azure_subscription_id` and source from the clean deployed commit. The command stops owned nodes and restarts
-them; schedule the demonstration in the authorized lab window. Inspect public and internal exact-origin traffic, route withdrawal, changed
-next hops, and restored sessions. Run normal verification after both independent failures.
-
-All current CEs are in Canada Central. This exercise demonstrates node failure and recovery within the deployed region, rather than cross-region redundancy.
+Normal verification after recovery checks the restored inventory and traffic. The exercise does not measure a comprehensive availability objective, origin-region failure, or cross-region redundancy. Those need a separate topology and acceptance design.

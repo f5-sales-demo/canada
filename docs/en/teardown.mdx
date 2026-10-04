@@ -1,36 +1,33 @@
 ---
-title: Teardown
-description: Destroy only owned Canadian demo resources
+title: Ownership and lifecycle
+description: Identify owned demonstration resources and retained platform prerequisites
 sidebar:
   order: 9
 ---
 
-Use a reviewed saved destroy plan from the demo root with an exclusive operator
-lock and Terraform's local state lock. Require only owned Canadian demo deletions.
-The protected local state directory and backups remain outside demo teardown.
+Canada and Multi-Cloud Networking have independent infrastructure and Terraform states. Canada owns its application namespace, registration token, Canadian Azure resources, CE sites, application objects and allocation selector binding. The reserved public-IP allocation itself remains platform-owned in its existing namespace.
 
-The application namespace, token, Canadian Azure resources and selector binding
-are owned by this deployment. The reserved public-IP allocation itself must remain
-present in its platform namespace after destroy.
+| Boundary | Lifecycle treatment |
+| --- | --- |
+| Owned Canadian application/infrastructure | Included in an ownership-scoped saved destroy plan |
+| Reserved public-IP allocation | Retained; only the demonstration's binding is released |
+| Protected local state and backups | Kept outside repository and infrastructure teardown |
+| MCN infrastructure and state | Independently owned; outside Canada teardown |
+| Shared Marketplace acceptance | Subscription prerequisite retained independently |
 
-Prove direct absence using Azure and XC reads, then rebuild from the exact clean
-merged main. Never transfer MCN state or manually remove its state entries.
-Complete apply, verify, destroy, direct absence and rebuild; leave the second
-build healthy with a refresh-enabled zero-change plan.
+The lifecycle validates the saved plan against owned scope, applies it with the exclusive deployment and state locks, then checks direct Azure/XC absence and allocation retention.
+A rebuild uses the exact clean merged source and independent inputs. A fresh zero-change plan and the [test observations](../verification/) describe the rebuilt candidate; deletion
+alone does not prove recovery.
 
-MCN retains AWS, Azure US, KVM, its shared registration token, Marketplace
-agreement and S3 backend. Its state must own seven CEs after extraction, while
-Canada Topology owns three.
+## Implementation modes
 
-## Scoped reset command
+Destroy mode changes owned demonstration infrastructure and collects absence/retention receipts:
 
 ```bash
 python3 scripts/lifecycle.py --mode destroy \
   --tfvars "$CANADA_PRIVATE/canada.tfvars" \
-  --backend-config "$CANADA_PRIVATE/backend.hcl" \
+  --backend-config="$CANADA_PRIVATE/backend.hcl" \
   --private-root "$CANADA_PRIVATE/destroy-receipts"
 ```
 
-The lifecycle saves and validates the destroy plan, checks Azure group and XC object absence, and requires the platform allocation to
-remain. `--mode full` performs build, destroy, direct absence, and a second verified build. These modes change owned demo infrastructure;
-use the reviewed inputs and authorized lab window. Never remove the protected state or backups as a documentation cleanup step.
+`--mode full` combines build, destroy, direct absence and a second verified build. These modes use reviewed inputs in the authorized lab window. Documentation work does not invoke them or remove protected state/backups. [Staging reference](../deployment/) explains the independent backend and source identity.

@@ -1,67 +1,33 @@
 ---
-title: Deployment
-description: Deploy the independent Canadian topology
+title: Demonstration staging
+description: Describe the Terraform phases and protected inputs used to stage the example
 sidebar:
   order: 4
 ---
 
-Use Terraform 1.16.3 and the signed xcsh 13.1.0 provider with API 10.0.1,
-contract 7.0.0 and telemetry v2. Verify the published artifact before initializing.
+Terraform stages the infrastructure supporting the [use case](../use-case/). This reference describes that process for readers inspecting the implementation; API examples remain in the article and the complete graph remains in [Terraform sources](../terraform/).
 
-Accept the Azure Customer Edge Marketplace terms once at subscription scope.
-MCN retains ownership of that shared prerequisite; Canada Topology does not
-duplicate it in its state.
+## Artifacts and inputs
 
-Use the local Terraform backend on the Ubuntu deployment workstation. Keep the
-state and backups outside the checkout in a directory with mode 0700, and keep
-the backend configuration at mode 0600. It contains only an absolute path to the
-independent Canada Topology state file. Local state contains credentials, so use
-the workstation's protected storage and private backup process.
+The source pins Terraform 1.16.3 and signed xcsh 13.1.0 with API 10.0.1, contract 7.0.0 and telemetry v2. Its [provider
+release](https://github.com/f5-sales-demo/terraform-provider-xcsh/releases/tag/v13.1.0) and [API release](https://github.com/f5-sales-demo/api-specs-enriched/releases/tag/v10.0.1)
+provide immutable references. The verifier checks source identity, archive digest, signature and embedded API receipt; initialization preserves the committed lockfile.
 
-Azure deployment uses the existing local Azure CLI login. No new Blob data role,
-storage key or cloud credential is required. The lifecycle holds an exclusive
-operator lock and Terraform locks the local state.
+The demonstration uses the existing Azure CLI login and shared subscription Marketplace acceptance. The Canada application namespace and registration token are separately owned; CE sites stay in `system`, and the reserved allocation stays in its platform namespace. The deployment manages its selector binding.
 
-Keep backend configuration, credentials and allocation identifiers
-outside Git. Initialize the demo with the private backend configuration and
-`-lockfile=readonly`. Set `source_repository` to `f5-sales-demo/canada`,
-`source_ref` to `refs/heads/main`, and `source_commit_sha` to the exact clean
-merged commit. Supply non-personal owner and actor identifiers.
+Private variable files, credentials, allocation identifiers, backend configuration, state and backups live outside the checkout. The local backend file contains the absolute state
+path; the directory uses mode 0700 and input files use 0600. Terraform's state lock and the lifecycle's exclusive lock serialize staging. Source provenance identifies the exact
+clean merged commit and repository `f5-sales-demo/canada`.
 
-The demo owns the `canada` application namespace and its dedicated
-registration token. CE sites remain in `system`. The existing reserved public-IP
-allocation stays in its platform namespace; only its selector binding is managed.
+## Staging phases
 
-Apply the bootstrap phase, wait for all three CE registrations, then plan and
-apply `azure_site_configuration_phase=configured` to bind observed NIC MACs and
-approve registrations. Always save and review the full plan before applying it.
-Canadian resources must remain in Canada Central or Canada East. Bastion is opt-in.
+Bootstrap creates the owned Canadian infrastructure and registrations. The configured phase binds observed NIC MACs and approves those registrations. The deployed example has three CEs and its origin in Canada Central; Canada East is an allowed input rather than a deployed recovery region. Saved plans are reviewed for ownership and scope before application.
 
-The public hostname must be exactly `canada.f5-sales-demo.ca`, published through
-existing tenant-managed `.ca` DNS to the retained allocation. Remove the former
-public hostname only after the exact hostname resolves and Canadian requests pass.
-Keep public IPv6 unpublished. Public advertisement has only the reserved RE VIP;
-CE BGP, primary-IP and ILB listeners use `internal.canada.f5-sales-demo.ca`, with
-no public advertisement or managed public DNS.
+The public listener uses tenant-managed DNS, the reserved RE allocation, and the selected country policy. The internal listener carries CE BGP, primary-IP and ILB diagnostics independently. Origin ingress uses infrastructure-source ACLs, separate from the public country policy. [Configuration mapping](../architecture/) locates each object in the source.
 
-The public load balancer explicitly selects the owned service policy with
-`allow_list.country_list = ["COUNTRY_CA"]` and `default_action_deny = {}`.
-Do not add IP, ASN, workstation, probe, unknown-country or inherited-policy
-exceptions. Keep `disable_trust_client_ip_headers` enabled.
+## Implementation commands
 
-Save a refresh-enabled plan and review it with `scripts/plan_scope.py --mode
-application`. Application and policy changes and provenance updates are allowed;
-CE, origin, FRR, Route Server and reserved-allocation replacement are rejected.
-Keep the existing Canada Central deployment; Canada East remains an allowed
-placement, and cross-region CE distribution is outside this change.
-
-## Verify the release and initialize
-
-The pinned pair is [signed xcsh v13.1.0](https://github.com/f5-sales-demo/terraform-provider-xcsh/releases/tag/v13.1.0) and [API
-v10.0.1](https://github.com/f5-sales-demo/api-specs-enriched/releases/tag/v10.0.1). The verifier checks source identity, ZIP digest,
-signature, and embedded API receipt before initialization. Preserve the committed lockfile.
-
-Set `CANADA_PRIVATE` to a protected directory outside the checkout. Keep `canada.tfvars` and `backend.hcl` at mode 0600 and the state directory at mode 0700. The backend file must contain only an absolute `path` to the independent state file. Supply private XC credentials through the existing operator environment and Azure CLI login.
+With `CANADA_PRIVATE` set to the protected input directory, the existing staging workflow verifies artifacts and initializes the independent backend:
 
 ```bash
 python3 scripts/verify-showcase-provider.py --private-root "$CANADA_PRIVATE/provider"
@@ -69,10 +35,7 @@ terraform -chdir=terraform init -input=false -lockfile=readonly -reconfigure \
   -backend-config="$CANADA_PRIVATE/backend.hcl"
 ```
 
-Run from a clean checkout equal to the remote merged main. `lifecycle.py` checks exact source, private-input permissions, provider identity,
-saved-plan scope and digest, and holds the exclusive operator lock. Its build mode applies bootstrap, polls registration, then applies
-configured MAC binding and verifies routing, public traffic, failure/recovery, and zero-change readiness. Its scope validator is an
-automated plan review; operators should inspect the saved plans and private logs as well.
+The lifecycle build mode applies the two phases, waits for registration, and collects routing, traffic, recovery and zero-change checks. It changes owned demonstration infrastructure according to the reviewed inputs.
 
 ```bash
 python3 scripts/lifecycle.py --mode build \
@@ -81,21 +44,6 @@ python3 scripts/lifecycle.py --mode build \
   --private-root "$CANADA_PRIVATE/build-receipts"
 ```
 
-## Private client and console access
-
-Read `ca_resource_group_name`, `ca_client_vm_name`, `canada_client_nic_name`, `canada_ilb_console_ip`, and `ca_xc_site_names` from the
-independent Terraform state. `ca_site_console_admin_passwords` is sensitive; retrieve it only in the protected operator session. The
-lifecycle routing check uses `--skip-console`, so console login needs separate acceptance.
-
-When Bastion is absent, Azure Run Command on the owned Canadian client can test the private console listener without adding public management ingress:
-
-```bash
-CANADA_RG=$(terraform -chdir=terraform output -raw ca_resource_group_name)
-CANADA_CLIENT=$(terraform -chdir=terraform output -raw ca_client_vm_name)
-CANADA_CONSOLE=$(terraform -chdir=terraform output -raw canada_ilb_console_ip)
-az vm run-command invoke --resource-group "$CANADA_RG" --name "$CANADA_CLIENT" \
-  --command-id RunShellScript \
-  --scripts "timeout 10 bash -c '</dev/tcp/$CANADA_CONSOLE/65500'"
-```
-
-This checks TCP reachability. Use the supported Site Console at port 65500 through the owned client's approved private access path to verify credentials and health. Do not treat a listening port as a successful console login. Bastion is optional; its absence does not justify opening origin SSH or public console ingress.
+The internal Site Console uses its separate ILB frontend and approved private client path. TCP reachability and valid console login are different observations; the lifecycle's
+routing check skips console login. Bastion is optional. The source keeps origin SSH disabled. [Test reference](../verification/) and [lifecycle boundaries](../teardown/) describe
+the associated evidence and ownership.
