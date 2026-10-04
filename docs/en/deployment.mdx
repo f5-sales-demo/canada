@@ -1,6 +1,8 @@
 ---
 title: Deployment
 description: Deploy the independent Canadian topology
+sidebar:
+  order: 4
 ---
 
 Use Terraform 1.16.3 and the signed xcsh 13.1.0 provider with API 10.0.1,
@@ -22,11 +24,11 @@ operator lock and Terraform locks the local state.
 
 Keep backend configuration, credentials and allocation identifiers
 outside Git. Initialize the demo with the private backend configuration and
-`-lockfile=readonly`. Set `source_repository` to `f5-sales-demo/canada-topology`,
+`-lockfile=readonly`. Set `source_repository` to `f5-sales-demo/canada`,
 `source_ref` to `refs/heads/main`, and `source_commit_sha` to the exact clean
 merged commit. Supply non-personal owner and actor identifiers.
 
-The demo owns the `canada-topology` application namespace and its dedicated
+The demo owns the `canada` application namespace and its dedicated
 registration token. CE sites remain in `system`. The existing reserved public-IP
 allocation stays in its platform namespace; only its selector binding is managed.
 
@@ -52,3 +54,48 @@ application`. Application and policy changes and provenance updates are allowed;
 CE, origin, FRR, Route Server and reserved-allocation replacement are rejected.
 Keep the existing Canada Central deployment; Canada East remains an allowed
 placement, and cross-region CE distribution is outside this change.
+
+## Verify the release and initialize
+
+The pinned pair is [signed xcsh v13.1.0](https://github.com/f5-sales-demo/terraform-provider-xcsh/releases/tag/v13.1.0) and [API
+v10.0.1](https://github.com/f5-sales-demo/api-specs-enriched/releases/tag/v10.0.1). The verifier checks source identity, ZIP digest,
+signature, and embedded API receipt before initialization. Preserve the committed lockfile.
+
+Set `CANADA_PRIVATE` to a protected directory outside the checkout. Keep `canada.tfvars` and `backend.hcl` at mode 0600 and the state directory at mode 0700. The backend file must contain only an absolute `path` to the independent state file. Supply private XC credentials through the existing operator environment and Azure CLI login.
+
+```bash
+python3 scripts/verify-showcase-provider.py --private-root "$CANADA_PRIVATE/provider"
+terraform -chdir=terraform init -input=false -lockfile=readonly -reconfigure \
+  -backend-config="$CANADA_PRIVATE/backend.hcl"
+```
+
+Run from a clean checkout equal to the remote merged main. `lifecycle.py` checks exact source, private-input permissions, provider identity,
+saved-plan scope and digest, and holds the exclusive operator lock. Its build mode applies bootstrap, polls registration, then applies
+configured MAC binding and verifies routing, public traffic, failure/recovery, and zero-change readiness. Its scope validator is an
+automated plan review; operators should inspect the saved plans and private logs as well.
+
+```bash
+python3 scripts/lifecycle.py --mode build \
+  --tfvars "$CANADA_PRIVATE/canada.tfvars" \
+  --backend-config "$CANADA_PRIVATE/backend.hcl" \
+  --private-root "$CANADA_PRIVATE/build-receipts"
+```
+
+## Private client and console access
+
+Read `ca_resource_group_name`, `ca_client_vm_name`, `canada_client_nic_name`, `canada_ilb_console_ip`, and `ca_xc_site_names` from the
+independent Terraform state. `ca_site_console_admin_passwords` is sensitive; retrieve it only in the protected operator session. The
+lifecycle routing check uses `--skip-console`, so console login needs separate acceptance.
+
+When Bastion is absent, Azure Run Command on the owned Canadian client can test the private console listener without adding public management ingress:
+
+```bash
+CANADA_RG=$(terraform -chdir=terraform output -raw ca_resource_group_name)
+CANADA_CLIENT=$(terraform -chdir=terraform output -raw ca_client_vm_name)
+CANADA_CONSOLE=$(terraform -chdir=terraform output -raw canada_ilb_console_ip)
+az vm run-command invoke --resource-group "$CANADA_RG" --name "$CANADA_CLIENT" \
+  --command-id RunShellScript \
+  --scripts "timeout 10 bash -c '</dev/tcp/$CANADA_CONSOLE/65500'"
+```
+
+This checks TCP reachability. Use the supported Site Console at port 65500 through the owned client's approved private access path to verify credentials and health. Do not treat a listening port as a successful console login. Bastion is optional; its absence does not justify opening origin SSH or public console ingress.
