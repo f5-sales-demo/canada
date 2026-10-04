@@ -119,8 +119,8 @@ run "canada_regional_virtual_sites_and_lb" {
   }
 
   assert {
-    condition     = xcsh_http_loadbalancer.canada[0].http.dns_volterra_managed == true
-    error_message = "The Canada showcase HTTP LB must use the delegated Canadian tenant domain."
+    condition     = xcsh_http_loadbalancer.canada[0].http.dns_volterra_managed == false
+    error_message = "The Canada showcase HTTP LB must use tenant-managed DNS without XC delegation."
   }
   assert {
     condition     = length(xcsh_http_loadbalancer.canada[0].advertise_custom.advertise_where) == 1

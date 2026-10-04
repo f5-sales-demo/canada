@@ -47,6 +47,11 @@ def validate_configuration(config: dict[str, Any], objects: dict[str, Any]) -> N
     lb = objects["loadbalancer"]["spec"]
     if lb.get("domains") != [config["domain"]] or not lb.get("add_location"):
         raise ValueError("Canadian load balancer domain or location receipt differs")
+    if lb.get("http", {}).get("dns_volterra_managed") is not False:
+        raise ValueError("tenant-managed public DNS must not require XC delegation")
+    host = objects["virtual_host"]["spec"]
+    if host.get("state") != "VIRTUAL_HOST_READY" or host.get("not_ready") is not None:
+        raise ValueError("generated public virtual host is not ready")
     ads = lb.get("advertise_custom", {}).get("advertise_where", [])
     public_ads = [
         ad["advertise_on_public"] for ad in ads if "advertise_on_public" in ad
@@ -187,6 +192,11 @@ def collect_configuration(config: dict[str, Any], get: Any) -> dict[str, Any]:
             re_namespace, "virtual_sites", config["virtual_site"], "/selectees"
         ),
         "loadbalancer": get(namespace, "http_loadbalancers", config["loadbalancer"]),
+        "virtual_host": get(
+            namespace,
+            "virtual_hosts",
+            "ves-io-http-loadbalancer-" + config["loadbalancer"],
+        ),
         "ce_selectees": get(
             namespace, "virtual_sites", config["ce_virtual_site"], "/selectees"
         ),

@@ -19,7 +19,7 @@ from typing import Any
 
 from plan_scope import validate
 
-REPOSITORY = "f5-sales-demo/canada-topology"
+REPOSITORY = "f5-sales-demo/canada"
 
 
 def run(argv: list[str], cwd: Path) -> str:
@@ -232,7 +232,7 @@ def main() -> None:
             "sites": list(output("ca_xc_site_names").values()),
             "public": output("canada_public_re"),
             "subscription": output("azure_subscription_id"),
-            "app_namespace": "canada-topology",
+            "app_namespace": "canada",
             "app_objects": [
                 ("http_loadbalancers", output("ca_loadbalancer_name")),
                 (
