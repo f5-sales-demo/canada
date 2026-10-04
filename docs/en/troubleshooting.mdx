@@ -1,0 +1,23 @@
+---
+title: Troubleshooting
+description: Diagnose hosting, advertisement, policy, and routing separately
+sidebar:
+  order: 8
+---
+
+| Symptom | Check | Recovery gate |
+| --- | --- | --- |
+| Public name fails | Tenant-managed `.ca` DNS and retained allocation binding; public IPv6 remains absent | Exact hostname resolves to allocation |
+| Canadian probe receives denial | Observed egress and XC actual-source country classification | Matched `CA` event and exact-origin success |
+| Non-Canadian probe succeeds | Explicit selected policy, `COUNTRY_CA`, default denial, disabled forwarding-header trust | All plain and spoofed variants denied by policy |
+| Wrong origin response | Owned Canadian CE selector, pool endpoint and origin control body | Exact body match and three owned sites |
+| Internal VIP fails | Client effective routes, six CE-to-FRR sessions, four FRR-to-Route-Server sessions | Both FRR next hops and successful internal samples |
+| Console is unreachable | Console frontend output, owned client route, listener and credentials | Valid login and healthy Site Console |
+| CE remains pending | Bootstrap registration, observed NIC MACs, configured-phase plan | Three ONLINE owned CEs |
+| Frozen init fails | Signed provider/API identity and committed lockfile | Artifact verification and readonly initialization |
+
+Use Terraform outputs to locate resources; do not paste sensitive outputs into a ticket. When Bastion is absent, use Azure Run Command on the owned Canadian client for private-route and console reachability diagnostics. See [deployment](../deployment/) for exact commands.
+
+A public HTTP success cannot substitute for origin identity or country classification. An internal-path success cannot accept the public policy. Failed live reads and stale rendered content leave acceptance incomplete.
+
+After any repair, repeat [verification](../verification/) and save a refresh-enabled zero-change plan. Use [teardown](../teardown/) only for a reviewed ownership-scoped reset.

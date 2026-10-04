@@ -1,17 +1,47 @@
 ---
 title: Canada Topology
-description: Canadian regional F5 Distributed Cloud deployment
+description: Canadian hosting and regional access control
+sidebar:
+  order: 1
+template: splash
+hero:
+  tagline: Show Canadian origins, regional delivery, and access control as three independent decisions.
+  image:
+    file: ../assets/canada-flag.svg
+    alt: Canadian flag with a red maple leaf on white between two red bands
+  actions:
+    - text: Explore the use case
+      link: ./use-case/
+      icon: right-arrow
+    - text: Present the demo
+      link: ./presentation/
+      variant: secondary
+    - text: Deploy and verify
+      link: ./deployment/
+      variant: secondary
 ---
 
-Three Azure Customer Edges in Canada use two FRR relays and Azure Route Server
-to advertise an internal diagnostic VIP. The public application at
-`canada.f5-sales-demo.ca` uses only the reserved VIP on Toronto and Montreal
-Regional Edges and an origin discovered exclusively through three Canadian CEs.
-An explicitly selected service policy allows only actual IPv4 source addresses
-classified as Canada by XC GeoIP, with default denial and no exceptions.
-Unknown countries are denied; client forwarding headers are never trusted.
-Public IPv6 remains unpublished until equivalent enforcement is verified.
+import { Card, CardGrid } from '@astrojs/starlight/components';
 
-Start with [deployment](./deployment/), then [verification](./verification/).
-Exercise [failover](./failover/) and use [teardown](./teardown/) for a scoped reset.
-The [Terraform sources](./terraform/) are included in this site.
+## A Canadian application, with evidence at each boundary
+
+Three owned Canadian Customer Edges discover the Canadian origin. A retained public allocation advertises the application on Toronto and Montreal Regional Edges. XC GeoIP authorizes the actual source address with `COUNTRY_CA`, default denial, and forwarding-header trust disabled.
+
+<CardGrid>
+  <Card title="Understand the architecture" icon="puzzle">
+    Follow the public and internal paths in the [architecture guide](./architecture/).
+  </Card>
+  <Card title="Operate with confidence" icon="setting">
+    Use frozen provider initialization, saved plans, and [verification gates](./verification/).
+  </Card>
+  <Card title="Rehearse recovery" icon="clock">
+    Observe node withdrawal, traffic, and restored sessions in the [failover guide](./failover/).
+  </Card>
+  <Card title="Inspect the Terraform" icon="document">
+    Review the [imported source reference](./terraform/) and its attribution.
+  </Card>
+</CardGrid>
+
+This guide is for sales presenters and operators. The topology demonstrates configured hosting and access controls; it does not establish comprehensive Canadian data residency or legal compliance. The deployed CEs share Canada Central, so node recovery is not evidence of cross-region redundancy.
+
+Flag artwork: [flag-icons v7.5.0](https://github.com/lipis/flag-icons/tree/v7.5.0), used under the [MIT license](../assets/flag-icons-LICENSE.txt).

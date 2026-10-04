@@ -1,0 +1,30 @@
+---
+title: Use case
+description: Explain Canadian hosting and regional access control
+sidebar:
+  order: 2
+---
+
+## Start with the business question
+
+A presenter needs to demonstrate that a Canadian application uses Canadian origins and accepts clients classified as Canadian. An operator needs to prove each decision from configuration and observed traffic. A Canadian URL alone proves neither.
+
+| Control | Configuration | Required evidence |
+| --- | --- | --- |
+| Hosting and origin discovery | Exactly three owned Canadian CEs and the Canadian origin pool | Owned site inventory, Azure placement, exact origin response |
+| Public advertisement | Retained public allocation and Toronto/Montreal RE selector | Allocation binding and responses from `tr2-tor` and `mtl7-mon` |
+| Client authorization | `COUNTRY_CA`, default denial, no forwarding-header trust | XC classification of actual egress and plain/spoofed denial receipts |
+
+The public name is tenant-managed `canada.f5-sales-demo.ca`. Public IPv6 is unpublished until equivalent enforcement is verified. The internal name is `internal.canada.f5-sales-demo.ca`; CE BGP, primary-IP, and ILB listeners have no public advertisement or managed public DNS.
+
+The origin infrastructure ACL accepts the verified provider-published RE/CDN CIDRs and exact authorized infrastructure sources. It is independent of the public client country policy. Keep origin SSH disabled.
+
+## Set the presentation boundary
+
+Describe Canadian hosting and regional access control. Avoid claims of complete Canadian data residency, legal compliance, or cross-region
+redundancy. Regional Edges are public entry points; their names do not prove where every control-plane, telemetry, or support operation
+occurs. All current CEs are in Canada Central. Canada East is an allowed placement, rather than a deployed recovery region.
+
+MCN owns its AWS, US Azure, KVM, registration token, Marketplace agreement, and backend independently. Canada owns its application namespace, dedicated token, three CEs, Canadian Azure resources, and allocation selector binding. The retained allocation itself stays platform-owned.
+
+Continue with [architecture](../architecture/) or use the [presenter walkthrough](../presentation/).
