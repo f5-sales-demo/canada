@@ -238,7 +238,7 @@ resource "xcsh_http_loadbalancer" "canada" {
   domains = [local.ca_lb_domain]
 
   http {
-    dns_volterra_managed = true
+    dns_volterra_managed = false
     port                 = 80
   }
 
