@@ -6,6 +6,7 @@ import copy
 import importlib.util
 import unittest
 from pathlib import Path
+from typing import Any
 
 SPEC = importlib.util.spec_from_file_location(
     "canadian_re",
@@ -37,7 +38,7 @@ class CanadianRETests(unittest.TestCase):
             "internal_loadbalancer": "canada-internal",
             "origin_ip": "192.0.2.30",
         }
-        self.objects = {
+        self.objects: dict[str, Any] = {
             "service_policy": {
                 "spec": {
                     "any_server": {},
