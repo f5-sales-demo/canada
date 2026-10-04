@@ -1,34 +1,69 @@
 ---
 title: Canada Topology
-description: Canadian hosting and regional access control
+description: Canadian sovereignty objectives for application hosting, regional delivery and source-country access
 sidebar:
   order: 1
 template: splash
 hero:
-  tagline: Understand how DNS, regional advertisement, client authorization, and origin discovery work together.
+  title: "Canadian sovereignty: hosting, delivery and access"
+  tagline: Explore how F5 Distributed Cloud supports Canadian hosting, regional application delivery and source-country access control.
   image:
     file: ../assets/canada-flag.svg
     alt: Canadian flag with a red maple leaf on white between two red bands
   actions:
-    - text: Read the use case
+    - text: Explore the showcase
       link: ./use-case/
       icon: right-arrow
-    - text: Understand the tests
+    - text: Understand the evidence
       link: ./verification/
-      variant: secondary
-    - text: Configuration reference
-      link: ./architecture/
       variant: secondary
 ---
 
-## Canadian hosting and regional access control
+import { Card, CardGrid } from "@astrojs/starlight/components";
 
-Follow an application request from tenant-managed DNS to a Canadian public listener, an actual-source country policy, and an origin discovered through Canadian Customer Edges. The [use case](./use-case/) explains each control with API configuration excerpts for existing F5 Distributed Cloud users.
+<style>{`
+  @media (min-width: 70rem) {
+    .sl-markdown-content > .card-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+`}</style>
 
-The demonstration places three Customer Edges and its origin in Canada Central and binds a reserved public allocation to Toronto/Montreal Regional Edges. A selected service policy permits `COUNTRY_CA` and denies other or unknown classifications, with forwarding-header trust disabled.
+The Government of Canada's [digital sovereignty framework](https://www.canada.ca/en/government/system/digital-government/digital-government-innovations/cloud-services/digital-sovereignty/digital-sovereignty-framework-improve-digital-readiness.html)
+frames control, assurance and resilience as goals.
+[Federal guidance](https://www.canada.ca/en/government/system/digital-government/guideline-service-digital.html#ToC4_4)
+calls for evaluating Canadian computing facilities or specified government
+premises abroad as a principal delivery option for Protected B, Protected C
+and classified information; its residency rule concerns stored data, not transit.
+[Nova Scotia's law](https://nslegislature.ca/sites/default/files/legc/statutes/persinfo.htm)
+requires Canadian storage and access for public-body personal information,
+subject to section 5 exceptions.
+[British Columbia's Act](https://www.bclaws.gov.bc.ca/civix/document/id/complete/statreg/96165_03)
+regulates public-body disclosure of personal information outside Canada.
 
-Read the [test reference](./verification/) to understand the observations, or consult the [configuration mapping](./architecture/) and [Terraform sources](./terraform/) when adapting the pattern. Staging, recovery, and lifecycle details remain in the reference navigation.
+This showcase demonstrates three configurable application controls that support those sovereignty objectives; it does not certify an application or establish complete sovereignty.
 
-Canadian origin placement, regional advertisement, and source-country authorization are independent decisions. The demonstrated node recovery is within Canada Central; it does not establish cross-region redundancy, comprehensive data residency, or legal compliance.
+## Showcase objectives
 
-Flag artwork: [flag-icons v7.5.0](https://github.com/lipis/flag-icons/tree/v7.5.0), used under the [MIT license](../assets/flag-icons-LICENSE.txt).
+<CardGrid>
+  <Card title="Host the application in Canada">
+    Place the application origin in Canada and discover it through the owned Canadian Customer Edges. This objective demonstrates where the origin runs and how the application selects it for incoming requests.
+
+    - [Explore Canadian origin configuration](./use-case/#origin-pool--canadian-origin)
+    - [Map the origin to configuration](./architecture/)
+  </Card>
+  <Card title="Serve through Canadian Regional Edges">
+    Bind a reserved public allocation to Toronto and Montreal Regional Edges, then advertise the application listener through that allocation. This objective demonstrates the intended Canadian public entry points for the application.
+
+    - [Explore regional advertisement](./use-case/#load-balancer--regional-advertisement)
+    - [Verify Regional Edge placement](./verification/)
+  </Card>
+  <Card title="Control access by source country">
+    Apply a policy to the actual client source: permit sources classified as Canadian and deny other or unknown classifications. This objective demonstrates country-based authorization without trusting a client-supplied forwarding header.
+
+    - [Explore client authorization](./use-case/#load-balancer--client-authorization)
+    - [Follow the proof sequence](./presentation/)
+  </Card>
+</CardGrid>
+
+Canadian entry-point placement does not establish end-to-end domestic packet routing. Source-country classification does not establish a user's identity or physical location.

@@ -1,156 +1,54 @@
 {
   "schema_version": 2,
   "date": "2026-10-04",
-  "status": "published-acceptance-passed",
-  "scope": "Published Canada use-case documentation, verified released artifacts and core managed blobs",
-  "authored_pages": 10,
+  "status": "candidate-verified",
+  "scope": "Canada landing sovereignty overview and objective cards",
+  "issue": "f5-sales-demo/canada#45",
   "source_sha256": {
-    "docs/en/architecture.mdx": "92bf43e53086fa9804e800b6683868d9686687b6a023e09b9987444d02fe6b6a",
-    "docs/en/deployment.mdx": "134f267abf05b6050ce6e2a66509ffbd46b8eafac2b09853694ad2519f018d22",
-    "docs/en/failover.mdx": "472aa50047f3738430d9ca53e0ac778e0969438179992aea5626dfcbdc093c8f",
-    "docs/en/index.mdx": "db59ec5ee1876ba4235fe7f6fb3735442d4af361a3dc7a03c23dbc75dbd44f3d",
-    "docs/en/presentation.mdx": "8ab7aa38a785a21529fb147d125a27d8803f44d297d41b41c3a45073eefe8397",
-    "docs/en/teardown.mdx": "ec8432155a5bd61876eb330e74b44d1ebbaf7afc6f17f6407ea0518ba664dc29",
-    "docs/en/terraform.mdx": "6fdbbc6adf65187fe9e1f24922aa161a0b0261da54a4a2e1c65efabcd1185448",
-    "docs/en/troubleshooting.mdx": "c51c1b93daccf41ac0798345fefc33f41fcaca602041eee6c7864af0f411c611",
-    "docs/en/use-case.mdx": "db0dc733364e5cf88899a3f09033d47fe7de8d16cba43e6ef1ed4da26ae98605",
-    "docs/en/verification.mdx": "d01b10e286b912a2e4bc2e8d401cf57ccb4a73e0fc02620faddcefb8a4025341",
-    "docs/llms-config.json": "234154da0ac0282c4877953df7f72ce9d4dba9222832195d3823dbb17f3be986"
+    "docs/en/index.mdx": "7dba76215e50a659121f5107c88b74c61034a819d68437e489b7617343e89675",
+    "docs/llms-config.json": "7abedd34b0ba463b0509c191fe498228fda8a122c193f9b7c7a1a38d0b7cbb15"
   },
-  "theme_tests": 89,
-  "api_examples": {
-    "api_release": "v10.0.1",
-    "json_excerpts": 10,
-    "field_shape_enum_and_reference_checks": "passed",
-    "repository_configuration_checks": "passed",
-    "installed_provider": "13.1.0",
-    "installed_provider_field_paths": 25,
-    "installed_provider_schema_sha256": "acaaa8b5145be3bafa00bd3d836e265ab50e350a06b8ec7c8c904a707c8ca9f6",
-    "schema_digest": "2e835c7cf2e6a8ecf38c2c5669a2cb7249d5edfc83d53e60d1e757ebae5463f5"
-  },
-  "local_links_assets_anchors": 471,
-  "official_links": [
+  "primary_sources_reviewed": [
     {
-      "url": "https://docs.cloud.f5.com/docs-v2/multi-cloud-app-connect/how-to/app-networking/origin-pools",
-      "status": 200,
-      "resolved_url": "https://docs.cloud.f5.com/docs-v2/multi-cloud-app-connect/how-to/app-networking/origin-pools",
-      "bytes": 349973
+      "url": "https://www.canada.ca/en/government/system/digital-government/guideline-service-digital.html#ToC4_4",
+      "finding": "Protected B, Protected C and classified information; principal facility option; stored-data residency differs from transit"
     },
     {
-      "url": "https://docs.cloud.f5.com/docs-v2/multi-cloud-app-connect/how-to/app-security/service-policy",
-      "status": 200,
-      "resolved_url": "https://docs.cloud.f5.com/docs-v2/multi-cloud-app-connect/how-to/app-security/service-policy",
-      "bytes": 390123
+      "url": "https://www.canada.ca/en/government/system/digital-government/digital-government-innovations/cloud-services/digital-sovereignty/digital-sovereignty-framework-improve-digital-readiness.html",
+      "finding": "Framework context on control, assurance and resilience, not a new mandate"
     },
     {
-      "url": "https://docs.cloud.f5.com/docs-v2/multi-cloud-app-connect/how-to/load-balance/create-http-load-balancer",
-      "status": 200,
-      "resolved_url": "https://docs.cloud.f5.com/docs-v2/multi-cloud-app-connect/how-to/load-balance/create-http-load-balancer",
-      "bytes": 695557
+      "url": "https://nslegislature.ca/sites/default/files/legc/statutes/persinfo.htm",
+      "finding": "Section 5 Canadian storage and access for public-body personal information, subject to exceptions"
     },
     {
-      "url": "https://docs.cloud.f5.com/docs-v2/platform/concepts/site#virtual-site",
-      "status": 200,
-      "resolved_url": "https://docs.cloud.f5.com/docs-v2/platform/concepts/site#virtual-site",
-      "bytes": 342787
+      "url": "https://www.bclaws.gov.bc.ca/civix/document/id/complete/statreg/96165_03",
+      "finding": "Current section 33.1 governs public-body disclosure outside Canada; section 33.2 is repealed"
     }
   ],
-  "llm_routes": [
-    "_llms-txt/en/architecture.txt",
-    "_llms-txt/en/deployment.txt",
-    "_llms-txt/en/failover.txt",
-    "_llms-txt/en/index.txt",
-    "_llms-txt/en/presentation.txt",
-    "_llms-txt/en/teardown.txt",
-    "_llms-txt/en/terraform.txt",
-    "_llms-txt/en/troubleshooting.txt",
-    "_llms-txt/en/use-case.txt",
-    "_llms-txt/en/verification.txt",
-    "_llms-txt/en.txt"
-  ],
-  "llm_priority": ["use-case", "index"],
-  "english_only": true,
-  "attribution_navigation": "excluded",
-  "visual_checks": {
-    "routes": 10,
-    "variants": 4,
-    "route_traversals": 40,
-    "errors": [],
-    "failed_responses": [],
-    "checks": [
-      "article and landing",
-      "reference and maintenance sidebar",
-      "desktop/mobile",
-      "light/dark",
-      "diagram",
-      "code",
-      "anchors",
-      "keyboard focus",
-      "favicon",
-      "horizontal overflow"
-    ],
-    "artifact": "ghcr.io/f5-sales-demo/docs-builder@sha256:cae5f5b5498aeefaff89587d3f9847a6b2904139a45f680a9012235e2a42643f"
-  },
-  "lint_privacy": "passed",
-  "published_acceptance": {
-    "status": "passed",
-    "source_commit": "bc3a2c601f75913c2162ba592a5262a03484490e",
-    "builder_image": "ghcr.io/f5-sales-demo/docs-builder@sha256:cae5f5b5498aeefaff89587d3f9847a6b2904139a45f680a9012235e2a42643f",
-    "pages_workflow": "https://github.com/f5-sales-demo/canada/actions/runs/37221559025",
-    "verified_endpoints": 31,
-    "llm_article_priority": "passed",
-    "desktop_mobile_light_dark_traversals": 40,
-    "browser_errors": [],
-    "failed_responses": []
-  },
-  "infrastructure_changes": false,
-  "delivery_authorization": "User directs linked issues, closing references, green CI and workflow delivery without a separate acceptance gate",
   "builder": {
-    "builder_version": "1.3.3",
-    "theme_version": "4.8.0",
-    "source_commit": "b5c465faa48870528133c625182400e35d4fc819",
     "image": "ghcr.io/f5-sales-demo/docs-builder@sha256:cae5f5b5498aeefaff89587d3f9847a6b2904139a45f680a9012235e2a42643f",
-    "architectures": ["linux/amd64", "linux/arm64"],
-    "workflow": "https://github.com/f5-sales-demo/docs-builder/actions/runs/37219567423",
-    "status": "published-and-installed-identity-verified"
+    "local_image_id": "sha256:f7cf09c1749ce05c3691fbcf6475acb73e002b83a2919ed6f3cc9ef58a3a6862",
+    "builder_version": "1.3.3",
+    "theme_version": "4.8.0"
   },
-  "theme_release": {
-    "version": "4.8.0",
-    "source_commit": "8ed9d8173e7132b8da9b0f7b80338138fc6a78ea",
-    "integrity": "sha512-hOrPJ7s95ZekDd8mCcrSmarzbdZEFXjr4Om9C9prNXuknvZsODZHWBYPR7UfhuWeoXYdcXyAnjTU5iOcO/iKGQ==",
-    "tarball": "https://registry.npmjs.org/@f5-sales-demo/docs-theme/-/docs-theme-4.8.0.tgz",
-    "registry_download_verified": true,
-    "workflow": "https://github.com/f5-sales-demo/docs-theme/actions/runs/37218790947"
+  "checks": {
+    "mdx_prose_lint": "passed",
+    "pii_enforce_and_audit": "passed",
+    "pinned_builder_build": "passed",
+    "local_links_and_anchors": 347,
+    "local_link_errors": 0,
+    "english_html_pages": 10,
+    "english_llm_page_routes": 10,
+    "llm_priority": ["use-case", "index"],
+    "llm_import_navigation": "excluded",
+    "visual_variants": ["desktop-light", "desktop-dark", "mobile-light", "mobile-dark"],
+    "desktop_card_columns": 3,
+    "mobile_card_columns": 1,
+    "browser_errors": [],
+    "failed_browser_responses": [],
+    "keyboard_focus": "hero actions and card links visible",
+    "flag_and_favicon": "loaded"
   },
-  "managed_blob_receipts": {
-    "status": "passed",
-    "manifest_source": "2ac2069fb14368b3b0b4c137be633c2c3ac7f121",
-    "manifest_head": "4cbbeb8afbdd07e32504a96360ffe66bbcdf904f",
-    "checks": [
-      {
-        "repository": "canada",
-        "path": ".github/workflows/github-pages-deploy.yml",
-        "blob": "6accaf8a107f625285f5ae173b342fea606d888a",
-        "manifest_match": true
-      },
-      {
-        "repository": "multi-cloud-networking",
-        "path": ".github/workflows/github-pages-deploy.yml",
-        "blob": "6accaf8a107f625285f5ae173b342fea606d888a",
-        "manifest_match": true
-      },
-      {
-        "repository": "canada",
-        "path": "README.md",
-        "blob": "b6c67a3899d32c9f9d271274a66f727d24c24ee2",
-        "manifest_match": true
-      },
-      {
-        "repository": "multi-cloud-networking",
-        "path": "README.md",
-        "blob": "b6c67a3899d32c9f9d271274a66f727d24c24ee2",
-        "manifest_match": true
-      }
-    ]
-  }
+  "infrastructure_changes": false
 }
