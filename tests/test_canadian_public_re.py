@@ -6,6 +6,7 @@ import copy
 import importlib.util
 import unittest
 from pathlib import Path
+from typing import Any
 
 SPEC = importlib.util.spec_from_file_location(
     "canadian_re",
@@ -37,7 +38,7 @@ class CanadianRETests(unittest.TestCase):
             "internal_loadbalancer": "canada-internal",
             "origin_ip": "192.0.2.30",
         }
-        self.objects = {
+        self.objects: dict[str, Any] = {
             "service_policy": {
                 "spec": {
                     "any_server": {},
@@ -67,6 +68,7 @@ class CanadianRETests(unittest.TestCase):
                 "spec": {
                     "domains": ["canada.f5-sales-demo.ca"],
                     "add_location": True,
+                    "http": {"dns_volterra_managed": False},
                     "disable_trust_client_ip_headers": {},
                     "active_service_policies": {
                         "policies": [{"name": "canada-only", "namespace": "demo"}]
@@ -87,6 +89,9 @@ class CanadianRETests(unittest.TestCase):
                         {"pool": {"name": "canada-pool", "namespace": "demo"}}
                     ],
                 }
+            },
+            "virtual_host": {
+                "spec": {"state": "VIRTUAL_HOST_READY", "not_ready": None}
             },
             "pool": {
                 "spec": {
@@ -223,3 +228,18 @@ class CanadianRETests(unittest.TestCase):
         ]:
             with self.assertRaises(ValueError):
                 module.validate_response(body, headers, "mcn-showcase-canada-origin")
+
+
+class PublicDnsReadinessTests(CanadianRETests):
+    def test_rejects_managed_dns_delegation(self):
+        self.objects["loadbalancer"]["spec"]["http"]["dns_volterra_managed"] = True
+        with self.assertRaises(ValueError):
+            module.validate_configuration(self.config, self.objects)
+
+    def test_rejects_pending_generated_host(self):
+        self.objects["virtual_host"]["spec"]["state"] = (
+            "VIRTUAL_HOST_PENDING_DNS_DELEGATION"
+        )
+        self.objects["virtual_host"]["spec"]["not_ready"] = {}
+        with self.assertRaises(ValueError):
+            module.validate_configuration(self.config, self.objects)
