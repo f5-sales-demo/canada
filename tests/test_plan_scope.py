@@ -117,3 +117,52 @@ class ScopeTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class NamespaceMigrationTests(unittest.TestCase):
+    def test_namespace_and_application_migration(self):
+        for address, before, after in [
+            ("xcsh_namespace.canada", {"name": "canada-topology"}, {"name": "canada"}),
+            (
+                "xcsh_http_loadbalancer.canada[0]",
+                {"namespace": "canada-topology"},
+                {"namespace": "canada"},
+            ),
+        ]:
+            module.validate(
+                {
+                    "resource_changes": [
+                        {
+                            "address": address,
+                            "change": {
+                                "actions": ["delete", "create"],
+                                "before": before,
+                                "after": after,
+                            },
+                        }
+                    ]
+                },
+                "namespace",
+            )
+
+    def test_ce_and_token_replacement_rejected(self):
+        for address in [
+            "xcsh_token.ce[0]",
+            'module.ce_vm_ca["one"].azurerm_linux_virtual_machine.this',
+        ]:
+            with self.assertRaises(ValueError):
+                module.validate(
+                    {
+                        "resource_changes": [
+                            {
+                                "address": address,
+                                "change": {
+                                    "actions": ["delete", "create"],
+                                    "before": {},
+                                    "after": {},
+                                },
+                            }
+                        ]
+                    },
+                    "namespace",
+                )

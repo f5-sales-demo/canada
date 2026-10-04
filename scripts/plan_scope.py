@@ -52,6 +52,39 @@ def validate(plan: dict, mode: str) -> None:
             for root in ROOTS
         ):
             raise ValueError("foreign resource in Canadian plan: " + address)
+        if mode == "namespace" and actions != ["no-op"]:
+            before = resource["change"].get("before") or {}
+            after = resource["change"].get("after") or {}
+            migrating_namespace = address == "xcsh_namespace.canada" and (
+                before.get("name") == "canada-topology"
+                and after.get("name") == "canada"
+            )
+            migrating_application = (
+                address.startswith(
+                    (
+                        "xcsh_http_loadbalancer.",
+                        "xcsh_origin_pool.",
+                        "xcsh_service_policy.",
+                        "xcsh_virtual_site.canada_ce",
+                        "module.azure_ilb_application_ca",
+                    )
+                )
+                and before.get("namespace") == "canada-topology"
+                and after.get("namespace") == "canada"
+            )
+            provenance = actions == ["update"] and all(
+                before.get(key) == after.get(key)
+                for key in set(before) | set(after)
+                if key not in {"labels", "tags", "description"}
+            )
+            if address == "terraform_data.deployment_guard" and actions == ["update"]:
+                provenance = before.get("input", {}).get("tenant") == after.get(
+                    "input", {}
+                ).get("tenant")
+            if not (migrating_namespace or migrating_application or provenance):
+                raise ValueError(
+                    "namespace migration changes unrelated infrastructure: " + address
+                )
         if mode == "application" and actions != ["no-op"]:
             application = address.startswith(
                 (
@@ -99,7 +132,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("plan")
     parser.add_argument(
-        "--mode", choices=["build", "destroy", "zero", "application"], required=True
+        "--mode",
+        choices=["build", "destroy", "zero", "application", "namespace"],
+        required=True,
     )
     args = parser.parse_args()
     with Path(args.plan).open(encoding="utf-8") as source:

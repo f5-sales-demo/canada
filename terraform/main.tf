@@ -400,6 +400,9 @@ module "ce_vm_ca" {
 resource "xcsh_namespace" "canada" {
   name   = "canada"
   labels = local.ca_xc_labels
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "xcsh_token" "ce" {
