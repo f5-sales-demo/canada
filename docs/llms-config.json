@@ -1,6 +1,6 @@
 {
   "title": "Canada Topology",
-  "description": "Canadian hosting and regional access control for F5 Distributed Cloud users: DNS, regional advertisement, actual-source authorization and Canadian CE origin discovery.",
+  "description": "Explore how F5 Distributed Cloud supports Canadian sovereignty objectives through application hosting in Canada, Canadian Regional Edge delivery and actual-source country access control.",
   "promote": ["index", "use-case"],
   "demote": [
     "architecture",
