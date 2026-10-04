@@ -57,8 +57,8 @@ placement, and cross-region CE distribution is outside this change.
 
 ## Verify the release and initialize
 
-The pinned pair is [signed xcsh v13.0.3](https://github.com/f5-sales-demo/terraform-provider-xcsh/releases/tag/v13.0.3) and [API
-v10.0.0](https://github.com/f5-sales-demo/api-specs-enriched/releases/tag/v10.0.0). The verifier checks source identity, ZIP digest,
+The pinned pair is [signed xcsh v13.1.0](https://github.com/f5-sales-demo/terraform-provider-xcsh/releases/tag/v13.1.0) and [API
+v10.0.1](https://github.com/f5-sales-demo/api-specs-enriched/releases/tag/v10.0.1). The verifier checks source identity, ZIP digest,
 signature, and embedded API receipt before initialization. Preserve the committed lockfile.
 
 Set `CANADA_PRIVATE` to a protected directory outside the checkout. Keep `canada.tfvars` and `backend.hcl` at mode 0600 and the state directory at mode 0700. The backend file must contain only an absolute `path` to the independent state file. Supply private XC credentials through the existing operator environment and Azure CLI login.

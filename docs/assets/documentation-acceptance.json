@@ -22,8 +22,8 @@
   "flag_equivalence": true,
   "svg_safety": true,
   "local_page_links": "passed",
-  "provider": "13.0.3",
-  "api": "10.0.0",
+  "provider": "13.1.0",
+  "api": "10.0.1",
   "infrastructure_changes": false,
   "schema_version": 1,
   "date": "2026-10-03",
@@ -94,6 +94,6 @@
     "builder": "26cfbae",
     "control": "e5ff74ad2"
   },
-  "human_acceptance": "pending",
+  "human_acceptance": "accepted by user on 2026-10-04",
   "published_acceptance": "pending"
 }
