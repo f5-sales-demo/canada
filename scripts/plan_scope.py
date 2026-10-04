@@ -6,6 +6,7 @@ import argparse
 import json
 import re
 from pathlib import Path
+from typing import Any
 
 ROOTS = {
     "module.azure_hub_ca",
@@ -38,6 +39,19 @@ ROOTS = {
     "azurerm_lb_rule.ca_application",
     "azurerm_lb_rule.ca_console",
 }
+
+
+def normalize_ce_readback(value: Any) -> Any:
+    """Ignore only omitted false interface flags returned by XC."""
+    if isinstance(value, dict):
+        return {
+            key: normalize_ce_readback(item)
+            for key, item in value.items()
+            if not (key in {"is_management", "is_primary"} and item is False)
+        }
+    if isinstance(value, list):
+        return [normalize_ce_readback(item) for item in value]
+    return value
 
 
 def validate(plan: dict, mode: str) -> None:
@@ -77,6 +91,15 @@ def validate(plan: dict, mode: str) -> None:
                 for key in set(before) | set(after)
                 if key not in {"labels", "tags", "description"}
             )
+            if resource.get("type") == "xcsh_securemesh_site_v2" and actions == [
+                "update"
+            ]:
+                provenance = all(
+                    normalize_ce_readback(before.get(key))
+                    == normalize_ce_readback(after.get(key))
+                    for key in set(before) | set(after)
+                    if key not in {"labels", "description"}
+                )
             if address == "terraform_data.deployment_guard" and actions == ["update"]:
                 provenance = before.get("input", {}).get("tenant") == after.get(
                     "input", {}
