@@ -1,52 +1,27 @@
 ---
-title: Verification
-description: Verify regional isolation and all Canadian paths
+title: Test reference
+description: Understand which observations establish DNS, placement, authorization, identity and recovery
 sidebar:
   order: 6
 ---
 
-Require three ONLINE CEs, six CE-to-FRR sessions and four FRR-to-Route-Server
-sessions. The client effective-route table must show both FRR next hops for the
-application VIP. Verify Site Console health and valid credentials.
+The [article's test matrix](../use-case/#checking-the-controls) describes what each observation proves. The supplied tools collect configuration and traffic evidence for the staged demonstration; they do not turn a network location or a response code into country-classification evidence.
 
-Collect 120 successful exact-origin samples on each VIP and ILB application path.
-Compare every body with the Canadian origin control response. Public traffic must
-use the reserved allocation, Toronto/Montreal selector and Canadian CE origin pool.
+| Tool | Evidence and boundary |
+| --- | --- |
+| `verify-canadian-public-re.py` | Allocation binding, RE/CE selectors, origin-pool reference, serving RE headers and exact origin response |
+| `verify-country-receipts.py` | A private receipt joining observed egress to XC source/classification and policy denial for plain and spoofed-header variants |
+| `verify-azure-routing.sh` | Internal routes, BGP session inventory and internal application paths |
+| `verify-azure-failover.sh` | Owned node withdrawal, surviving traffic and restored sessions; see [recovery scope](../failover/) |
+| `lifecycle.py --mode verify` | The staged deployment's combined checks and refresh-enabled zero-change readiness |
 
-Run `scripts/verify-canadian-public-re.py` with the deployed Terraform directory,
-a new private evidence directory and `--samples 120`. It validates selector,
-pool, binding, regional response headers and the exact Canadian origin marker.
+The existing verifier uses repeated samples as an automation gate. Its sample count is a property of that implementation, not a guarantee of availability or geography. A classified
+Canadian request must match the origin control body. A negative receipt needs a matching policy-denial event, since an unrelated HTTP error proves no country-policy decision.
+Supplied forwarding headers must leave the actual-source result unchanged.
 
-Origin ingress must equal the union of all provider-published Regional Edge/CDN
-CIDRs, both workstation /32s and exact owned Canadian probe addresses. Reject
-unlisted ingress. Origin SSH remains disabled. This infrastructure-source allowlist protects
-origin ingress; it is separate from public client country authorization.
+## Supplied commands
 
-Finish with a refresh-enabled plan returning exit code zero, no resource actions
-and no output changes. Keep raw evidence private; publish only sanitized receipts.
-
-Public acceptance requires DNS for `canada.f5-sales-demo.ca` to resolve to the
-retained allocation, 120 successful Canadian-source requests, both exact RE
-selectees (`tr2-tor` and `mtl7-mon`), and the exact Canadian origin response.
-Denied non-Canadian requests must include spoofed `X-Forwarded-For`, `Forwarded`
-and `X-Real-IP` headers. Bind each negative receipt to its observed egress IP
-and the XC country classification of that actual source. An Azure region alone
-is not classification evidence. Unknown countries must remain denied.
-
-Audit source, rendered pages, machine-readable endpoints, state and live XC
-objects together. Unavailable live reads or stale rendered documentation fail
-acceptance. Repeat public and internal traffic checks during independent CE and
-FRR failures and after recovery. Publish only sanitized audit and acceptance
-receipts; retain observed source addresses and raw XC events in private evidence.
-
-Use `scripts/verify-country-receipts.py` to validate private classification and
-negative-test receipts. It rejects receipts without matching observed egress,
-XC source addresses, country classification and explicit policy-denial evidence
-for every plain and spoofed forwarding-header variant.
-
-## Run the supplied gates
-
-The following commands consume protected state or receipts. Keep their evidence directories outside Git and sanitize results before sharing.
+These commands read protected deployment state or private receipts. `CANADA_PRIVATE` names the deployment's protected evidence directory; [staging reference](../deployment/) describes its inputs.
 
 ```bash
 python3 scripts/verify-canadian-public-re.py --terraform-dir terraform \
@@ -58,16 +33,6 @@ python3 scripts/lifecycle.py --mode verify \
   --private-root "$CANADA_PRIVATE/verify-receipts"
 ```
 
-The public RE verifier validates configuration and exact-origin responses; the country-receipt validator separately requires observed
-egress, matched XC source/classification, 120 Canadian successes, and explicit policy-denial evidence for every negative header variant.
-Prepare that private JSON receipt from actual events; do not infer classification from location.
+The country receipt is assembled from actual XC events and observed egress; the validator checks their consistency. Raw addresses, credentials, state and events remain in protected storage. A sanitized receipt can identify the tested source commit, artifact identities, observations and outcome without publishing those inputs.
 
-## Dated evidence
-
-The [v13.0.3 planning repair and verification record](https://github.com/f5-sales-demo/canada/pull/22) was merged on 2026-10-03. It
-pins signed provider/API identity and validates frozen initialization and planning. Earlier [demo-boundary
-evidence](https://github.com/f5-sales-demo/canada/pull/16) describes the public and internal acceptance gates. These records are
-historical evidence for their exact candidates; they do not prove today's live topology. Require a new receipt for the current deployed
-source and every presentation.
-
-The [documentation candidate receipt](../../assets/documentation-acceptance.json) records the local build, generated-route coverage, flag review, and visual checks. Published release and Pages acceptance remain separate gates.
+The [documentation receipt](../../assets/documentation-acceptance.json) binds documentation checks to their candidate. It is separate from live infrastructure acceptance. A zero-change plan establishes state/configuration convergence for the observed deployment; it does not replace DNS, traffic, policy or origin evidence.

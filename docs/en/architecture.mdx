@@ -1,43 +1,22 @@
 ---
-title: Architecture
-description: Follow public delivery and internal routing independently
+title: Configuration mapping
+description: Map the use-case controls to API objects and authoritative Terraform sources
 sidebar:
   order: 3
 ---
 
-## Three decisions in the public path
+The [primary article](../use-case/) explains the request path and API fields. This reference maps those controls to the demonstration's source.
 
-```mermaid
-flowchart LR
-  Client[Actual client source] --> DNS[Tenant-managed .ca DNS]
-  DNS --> VIP[Retained public IPv4 allocation]
-  VIP --> RE[Toronto and Montreal REs]
-  RE --> Policy{XC GeoIP COUNTRY_CA}
-  Policy -->|Canada| Pool[Owned Canadian CE origin discovery]
-  Policy -->|Other or unknown| Deny[Default denial]
-  Pool --> CE[Exactly three Canadian CEs]
-  CE --> Origin[Canadian origin]
-  Headers[Forwarding headers] -. trust disabled .-> Policy
-```
+| Control | Objects or fields | Terraform source |
+| --- | --- | --- |
+| Tenant-managed DNS and HTTP listener | `domains`, `http.dns_volterra_managed: false`, port 80 | [main.tf](../terraform/#maintf); DNS is maintained by the tenant |
+| Regional advertisement | RE virtual site, public-IP `virtual_sites` binding, `advertise_custom` | [main.tf](../terraform/#maintf) |
+| Client authorization | Explicit `active_service_policies`, `COUNTRY_CA`, default denial, disabled header trust | [main.tf](../terraform/#maintf) |
+| Canadian origin discovery | Default route pool, CE virtual site, outside-network endpoint | [main.tf](../terraform/#maintf) |
+| Origin infrastructure ACL | Provider-published RE/CDN ranges and authorized infrastructure sources | [origin.tf](../terraform/#origintf) |
+| Canadian deployment and ownership | Azure hub, three CE nodes, two FRR relays, client and origin | [main.tf](../terraform/#maintf), [locals.tf](../terraform/#localstf) |
+| Internal diagnostic listeners | CE BGP, primary-IP, application ILB and Site Console frontend | [main.tf](../terraform/#maintf), [ca_ilb.tf](../terraform/#ca_ilbtf) |
 
-The RE virtual site selects exactly `tr2-tor` and `mtl7-mon`. Public traffic uses the retained allocation; the CE origin pool selects only the three owned Canadian sites. The load balancer explicitly selects the owned country policy. Unknown classifications are denied.
+The public listener references the reserved allocation only. A separate internal listener exposes diagnostic CE/ILB paths without public advertisement or managed public DNS. The internal client learns the application VIP through Azure Route Server and two FRR next hops. The expected routing inventory has six CE-to-FRR and four FRR-to-Route-Server sessions.
 
-## Internal routing and console path
-
-```mermaid
-flowchart LR
-  Client[Owned Canadian client] --> RS[Azure Route Server learned routes]
-  RS --> FRR[Two FRR relays]
-  FRR --> CE[Three Canadian CEs]
-  CE --> App[Internal application VIP]
-  Client --> ILB[Azure internal load balancer]
-  ILB --> CE
-  CE --> Origin[Canadian origin]
-  ILB --> Console[Site Console listener]
-```
-
-The internal diagnostic hostname is separate from public advertisement. Expect six CE-to-FRR and four FRR-to-Route-Server sessions, with both FRR next hops in the client effective routes. The application ILB and console listener use distinct frontend outputs; do not confuse an internal VIP with the retained public allocation.
-
-Origin ingress is the union of provider-published RE/CDN CIDRs, authorized workstation /32s, and exact owned Canadian probe sources. This infrastructure-source allowlist permits origin delivery and diagnostics; public GeoIP authorization applies separately at the public load balancer.
-
-The independent Canada state lives in protected workstation storage. MCN state and the shared Marketplace prerequisite are outside Canada's ownership. See [deployment](../deployment/) for registration phases and [failover](../failover/) for node recovery.
+The CE selector identifies owned sites; Azure placement establishes their region. Origin ingress ACLs govern infrastructure connections independently of the public country policy. [Recovery behavior](../failover/) explains the tested node scope, and [ownership and lifecycle](../teardown/) identifies retained platform resources.

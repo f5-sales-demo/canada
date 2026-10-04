@@ -5,43 +5,30 @@ sidebar:
   order: 1
 template: splash
 hero:
-  tagline: Show Canadian origins, regional delivery, and access control as three independent decisions.
+  tagline: Understand how DNS, regional advertisement, client authorization, and origin discovery work together.
   image:
     file: ../assets/canada-flag.svg
     alt: Canadian flag with a red maple leaf on white between two red bands
   actions:
-    - text: Explore the use case
+    - text: Read the use case
       link: ./use-case/
       icon: right-arrow
-    - text: Present the demo
-      link: ./presentation/
+    - text: Understand the tests
+      link: ./verification/
       variant: secondary
-    - text: Deploy and verify
-      link: ./deployment/
+    - text: Configuration reference
+      link: ./architecture/
       variant: secondary
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+## Canadian hosting and regional access control
 
-## A Canadian application, with evidence at each boundary
+Follow an application request from tenant-managed DNS to a Canadian public listener, an actual-source country policy, and an origin discovered through Canadian Customer Edges. The [use case](./use-case/) explains each control with API configuration excerpts for existing F5 Distributed Cloud users.
 
-Three owned Canadian Customer Edges discover the Canadian origin. A retained public allocation advertises the application on Toronto and Montreal Regional Edges. XC GeoIP authorizes the actual source address with `COUNTRY_CA`, default denial, and forwarding-header trust disabled.
+The demonstration places three Customer Edges and its origin in Canada Central and binds a reserved public allocation to Toronto/Montreal Regional Edges. A selected service policy permits `COUNTRY_CA` and denies other or unknown classifications, with forwarding-header trust disabled.
 
-<CardGrid>
-  <Card title="Understand the architecture" icon="puzzle">
-    Follow the public and internal paths in the [architecture guide](./architecture/).
-  </Card>
-  <Card title="Operate with confidence" icon="setting">
-    Use frozen provider initialization, saved plans, and [verification gates](./verification/).
-  </Card>
-  <Card title="Rehearse recovery" icon="clock">
-    Observe node withdrawal, traffic, and restored sessions in the [failover guide](./failover/).
-  </Card>
-  <Card title="Inspect the Terraform" icon="document">
-    Review the [imported source reference](./terraform/) and its attribution.
-  </Card>
-</CardGrid>
+Read the [test reference](./verification/) to understand the observations, or consult the [configuration mapping](./architecture/) and [Terraform sources](./terraform/) when adapting the pattern. Staging, recovery, and lifecycle details remain in the reference navigation.
 
-This guide is for sales presenters and operators. The topology demonstrates configured hosting and access controls; it does not establish comprehensive Canadian data residency or legal compliance. The deployed CEs share Canada Central, so node recovery is not evidence of cross-region redundancy.
+Canadian origin placement, regional advertisement, and source-country authorization are independent decisions. The demonstrated node recovery is within Canada Central; it does not establish cross-region redundancy, comprehensive data residency, or legal compliance.
 
 Flag artwork: [flag-icons v7.5.0](https://github.com/lipis/flag-icons/tree/v7.5.0), used under the [MIT license](../assets/flag-icons-LICENSE.txt).

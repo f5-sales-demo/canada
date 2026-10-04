@@ -1,7 +1,16 @@
 {
   "title": "Canada Topology",
-  "description": "Canadian hosting and regional access control: a sales demo and operator guide for three owned Canadian Customer Edges, Toronto/Montreal advertisement, and actual-source GeoIP authorization.",
-  "promote": ["index", "use-case", "architecture", "presentation"],
-  "demote": ["terraform"],
+  "description": "Canadian hosting and regional access control for F5 Distributed Cloud users: DNS, regional advertisement, actual-source authorization and Canadian CE origin discovery.",
+  "promote": ["index", "use-case"],
+  "demote": [
+    "architecture",
+    "verification",
+    "presentation",
+    "terraform",
+    "deployment",
+    "failover",
+    "troubleshooting",
+    "teardown"
+  ],
   "exclude": ["_data/**"]
 }

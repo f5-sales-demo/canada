@@ -1,23 +1,23 @@
 ---
-title: Troubleshooting
-description: Diagnose hosting, advertisement, policy, and routing separately
+title: Symptom-to-control map
+description: Locate the configuration boundary associated with an observed symptom
 sidebar:
   order: 8
 ---
 
-| Symptom | Check | Recovery gate |
+Use this map with the [primary article](../use-case/) to identify which control an observation concerns. It is a reference to the boundaries, rather than a recovery procedure.
+
+| Symptom | Relevant control | Useful observation |
 | --- | --- | --- |
-| Public name fails | Tenant-managed `.ca` DNS and retained allocation binding; public IPv6 remains absent | Exact hostname resolves to allocation |
-| Canadian probe receives denial | Observed egress and XC actual-source country classification | Matched `CA` event and exact-origin success |
-| Non-Canadian probe succeeds | Explicit selected policy, `COUNTRY_CA`, default denial, disabled forwarding-header trust | All plain and spoofed variants denied by policy |
-| Wrong origin response | Owned Canadian CE selector, pool endpoint and origin control body | Exact body match and three owned sites |
-| Internal VIP fails | Client effective routes, six CE-to-FRR sessions, four FRR-to-Route-Server sessions | Both FRR next hops and successful internal samples |
-| Console is unreachable | Console frontend output, owned client route, listener and credentials | Valid login and healthy Site Console |
-| CE remains pending | Bootstrap registration, observed NIC MACs, configured-phase plan | Three ONLINE owned CEs |
-| Frozen init fails | Signed provider/API identity and committed lockfile | Artifact verification and readonly initialization |
+| Public name does not resolve as expected | Tenant-managed DNS | A record and reserved allocation address; public AAAA remains absent |
+| Unexpected public serving region | RE selector and allocation binding | Actual virtual-site selectees and serving RE event/header |
+| Canadian user receives denial | Actual-source classification | Observed VPN/proxy egress and XC country classification |
+| Classified foreign source succeeds | Explicit service-policy selection | `COUNTRY_CA`, default denial and disabled header trust on this listener |
+| Forwarding headers alter authorization | Client-IP header trust | Same actual source and policy event across header variants |
+| Unexpected application body | Pool reference and CE origin discovery | Pool endpoint, owned CE selectees and origin control body |
+| Internal VIP fails | Internal routes and relay sessions | Effective routes and CE/FRR/Route-Server inventory |
+| Console connection fails | Separate console frontend and private path | Correct frontend, TCP reachability and valid console login |
+| CE stays pending | Registration/configured phase | Observed NIC MACs, registration mapping and owned site state |
+| Frozen initialization fails | Artifact/lockfile identity | Signed provider/API receipt and readonly initialization result |
 
-Use Terraform outputs to locate resources; do not paste sensitive outputs into a ticket. When Bastion is absent, use Azure Run Command on the owned Canadian client for private-route and console reachability diagnostics. See [deployment](../deployment/) for exact commands.
-
-A public HTTP success cannot substitute for origin identity or country classification. An internal-path success cannot accept the public policy. Failed live reads and stale rendered content leave acceptance incomplete.
-
-After any repair, repeat [verification](../verification/) and save a refresh-enabled zero-change plan. Use [teardown](../teardown/) only for a reviewed ownership-scoped reset.
+Origin infrastructure ingress is a separate boundary: an ACL failure can prevent delivery even when client authorization succeeds. The [test reference](../verification/) explains what the observations prove, and [staging reference](../deployment/) identifies the implementation phases. Private state, source addresses and events are not published in diagnostic material.
