@@ -7,7 +7,7 @@ terraform {
     azapi = { source = "Azure/azapi", version = "= 2.12.0" }
     xcsh = {
       source  = "f5-sales-demo/xcsh"
-      version = "= 13.0.3"
+      version = "= 13.1.0"
     }
     azurerm = {
       source  = "hashicorp/azurerm"
