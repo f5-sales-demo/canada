@@ -94,7 +94,7 @@
     ]
   },
   "lint_privacy": "passed",
-  "human_acceptance": "pending for this candidate",
   "published_acceptance": "pending dependency release and convergence",
-  "infrastructure_changes": false
+  "infrastructure_changes": false,
+  "delivery_authorization": "User directs linked issues, closing references, green CI and workflow delivery without a separate acceptance gate"
 }
