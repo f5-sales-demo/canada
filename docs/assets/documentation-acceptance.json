@@ -2,21 +2,21 @@
   "status": "passed",
   "authored_pages": 10,
   "llm_routes": {
-    "llms.txt": 742,
-    "llms-small.txt": 130616,
-    "llms-full.txt": 146473,
-    "en/llms.txt": 752,
-    "_llms-txt/en.txt": 1539,
+    "llms.txt": 715,
+    "llms-small.txt": 131051,
+    "llms-full.txt": 146936,
+    "en/llms.txt": 725,
+    "_llms-txt/en.txt": 1449,
     "_llms-txt/en/use-case.txt": 2498,
     "_llms-txt/en/architecture.txt": 2083,
     "_llms-txt/en/presentation.txt": 2470,
     "_llms-txt/en/index.txt": 1344,
-    "_llms-txt/en/deployment.txt": 5999,
+    "_llms-txt/en/deployment.txt": 5981,
     "_llms-txt/en/failover.txt": 1661,
     "_llms-txt/en/teardown.txt": 1618,
     "_llms-txt/en/troubleshooting.txt": 2546,
-    "_llms-txt/en/verification.txt": 4036,
-    "_llms-txt/en/terraform.txt": 122121
+    "_llms-txt/en/verification.txt": 4246,
+    "_llms-txt/en/terraform.txt": 122392
   },
   "english_only": true,
   "flag_equivalence": true,
@@ -26,9 +26,13 @@
   "api": "10.0.1",
   "infrastructure_changes": false,
   "schema_version": 1,
-  "date": "2026-10-03",
-  "scope": "Local documentation candidate; published Pages and release acceptance remain pending",
-  "theme_tests": 85,
+  "date": "2026-10-04",
+  "scope": "Shared-builder candidate; published Pages acceptance follows dependency release",
+  "theme": "4.7.0",
+  "builder": "1.3.2",
+  "theme_tests": 86,
+  "human_acceptance": "accepted by user on 2026-10-04",
+  "published_acceptance": "pending",
   "visual_checks": [
     {
       "mobile": false,
@@ -86,14 +90,5 @@
       "errors": [],
       "overflow": false
     }
-  ],
-  "media_review": "Canadian SVG paths visually reviewed; no embedded images, scripts, external references, personal metadata, or text; upstream license retained.",
-  "source_bases": {
-    "canada": "a04a599",
-    "theme": "c4516b5",
-    "builder": "26cfbae",
-    "control": "e5ff74ad2"
-  },
-  "human_acceptance": "accepted by user on 2026-10-04",
-  "published_acceptance": "pending"
+  ]
 }
