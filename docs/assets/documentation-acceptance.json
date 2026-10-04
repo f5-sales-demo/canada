@@ -1,8 +1,8 @@
 {
   "schema_version": 2,
   "date": "2026-10-04",
-  "status": "candidate-validation-passed",
-  "scope": "Canada use-case documentation overhaul; local shared-builder candidate before release",
+  "status": "released-artifact-validation-passed",
+  "scope": "Canada use-case documentation on verified released builder; published Pages acceptance follows content merge",
   "authored_pages": 10,
   "source_sha256": {
     "docs/en/architecture.mdx": "92bf43e53086fa9804e800b6683868d9686687b6a023e09b9987444d02fe6b6a",
@@ -17,9 +17,6 @@
     "docs/en/verification.mdx": "d01b10e286b912a2e4bc2e8d401cf57ccb4a73e0fc02620faddcefb8a4025341",
     "docs/llms-config.json": "234154da0ac0282c4877953df7f72ce9d4dba9222832195d3823dbb17f3be986"
   },
-  "theme_candidate_commit": "9d51f353585f94b19b8bdc8e41e842d5e1e23df9",
-  "builder_base": "ghcr.io/f5-sales-demo/docs-builder@sha256:5785f53f8dcbcc8786d1c255aed3beb2f0371f1fcdde8bb3f42243f53a8126a3",
-  "builder_candidate_overrides": ["config.ts", "src/utils/publication-profiles.ts"],
   "theme_tests": 89,
   "api_examples": {
     "api_release": "v10.0.1",
@@ -91,10 +88,28 @@
       "keyboard focus",
       "favicon",
       "horizontal overflow"
-    ]
+    ],
+    "artifact": "ghcr.io/f5-sales-demo/docs-builder@sha256:cae5f5b5498aeefaff89587d3f9847a6b2904139a45f680a9012235e2a42643f"
   },
   "lint_privacy": "passed",
-  "published_acceptance": "pending dependency release and convergence",
+  "published_acceptance": "pending content merge and Pages workflow",
   "infrastructure_changes": false,
-  "delivery_authorization": "User directs linked issues, closing references, green CI and workflow delivery without a separate acceptance gate"
+  "delivery_authorization": "User directs linked issues, closing references, green CI and workflow delivery without a separate acceptance gate",
+  "builder": {
+    "builder_version": "1.3.3",
+    "theme_version": "4.8.0",
+    "source_commit": "b5c465faa48870528133c625182400e35d4fc819",
+    "image": "ghcr.io/f5-sales-demo/docs-builder@sha256:cae5f5b5498aeefaff89587d3f9847a6b2904139a45f680a9012235e2a42643f",
+    "architectures": ["linux/amd64", "linux/arm64"],
+    "workflow": "https://github.com/f5-sales-demo/docs-builder/actions/runs/37219567423",
+    "status": "published-and-installed-identity-verified"
+  },
+  "theme_release": {
+    "version": "4.8.0",
+    "source_commit": "8ed9d8173e7132b8da9b0f7b80338138fc6a78ea",
+    "integrity": "sha512-hOrPJ7s95ZekDd8mCcrSmarzbdZEFXjr4Om9C9prNXuknvZsODZHWBYPR7UfhuWeoXYdcXyAnjTU5iOcO/iKGQ==",
+    "tarball": "https://registry.npmjs.org/@f5-sales-demo/docs-theme/-/docs-theme-4.8.0.tgz",
+    "registry_download_verified": true,
+    "workflow": "https://github.com/f5-sales-demo/docs-theme/actions/runs/37218790947"
+  }
 }
