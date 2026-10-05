@@ -1,6 +1,6 @@
 {
   "title": "Canada Topology",
-  "description": "Explore how F5 Distributed Cloud supports Canadian sovereignty objectives through application hosting in Canada, Canadian Regional Edge delivery and actual-source country access control.",
+  "description": "Configure Canadian application delivery with F5 Distributed Cloud: connect a Canadian origin, advertise Toronto and Montreal Regional Edges, and control access by source country.",
   "promote": ["index", "use-case"],
   "demote": [
     "architecture",
