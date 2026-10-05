@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "date": "2026-10-04",
-  "status": "candidate-verified",
+  "status": "published-acceptance-passed",
   "scope": "Engineer-focused Canada application delivery landing",
   "issue": "f5-sales-demo/canada#49",
   "source_sha256": {
@@ -32,6 +32,16 @@
     "failed_browser_responses": [],
     "keyboard_focus": "hero actions and card links visible",
     "flag_and_favicon": "loaded"
+  },
+  "published_acceptance": {
+    "source_commit": "e0d040309338efc2bb7984c1306771e54798ad1a",
+    "pages_workflow": "https://github.com/f5-sales-demo/canada/actions/runs/37246442997",
+    "builder_image": "ghcr.io/f5-sales-demo/docs-builder@sha256:cae5f5b5498aeefaff89587d3f9847a6b2904139a45f680a9012235e2a42643f",
+    "workflow_content_and_builder_identity": "verified in build log",
+    "published_endpoints": 10,
+    "published_receipt_matches_source": true,
+    "published_source_hashes_match": true,
+    "technical_hero_cards_destinations_and_llm_priority": "passed"
   },
   "infrastructure_changes": false
 }
