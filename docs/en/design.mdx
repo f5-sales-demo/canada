@@ -1,0 +1,10 @@
+---
+title: Design overview
+description: Follow the Canadian request path and map its controls to the Terraform configuration.
+---
+
+Start with the [Canadian traffic path](../use-case/) to see how DNS, Regional Edge advertisement, source-country authorization, and Canadian origin discovery work together. Use the [configuration map](../architecture/) to locate each control in the API and Terraform source.
+
+The public listener is advertised through Toronto and Montreal Regional Edges. A separate internal path supports CE and ILB diagnostics. The source-country decision uses XC's classification of the actual client source; it does not infer geography from the origin or trust client-supplied forwarding headers.
+
+Next, [deploy the demo](../deploy/) with the documented inputs and source identity.

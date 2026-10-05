@@ -1,11 +1,11 @@
 ---
-title: Ownership and lifecycle
-description: Identify owned demonstration resources and retained platform prerequisites
+title: Resource cleanup
+description: Remove only owned Canada demonstration resources while retaining shared platform prerequisites and protected evidence.
 sidebar:
   order: 9
 ---
 
-Canada and Multi-Cloud Networking have independent infrastructure and Terraform states. Canada owns its application namespace, registration token, Canadian Azure resources, CE sites, application objects and allocation selector binding. The reserved public-IP allocation itself remains platform-owned in its existing namespace.
+Canada and Multi-Cloud Networking have separate infrastructure and Terraform states. Canada owns its application namespace, registration token, Canadian Azure resources, CE sites, application objects, and allocation selector binding. The reserved public-IP allocation remains platform-owned in its existing namespace.
 
 | Boundary | Lifecycle treatment |
 | --- | --- |
@@ -16,7 +16,7 @@ Canada and Multi-Cloud Networking have independent infrastructure and Terraform 
 | Shared Marketplace acceptance | Subscription prerequisite retained independently |
 
 The lifecycle validates the saved plan against owned scope, applies it with the exclusive deployment and state locks, then checks direct Azure/XC absence and allocation retention.
-A rebuild uses the exact clean merged source and independent inputs. A fresh zero-change plan and the [test observations](../verification/) describe the rebuilt candidate; deletion
+A rebuild uses the exact clean merged source and independent inputs. A fresh zero-change plan and the [verification observations](../verification/) describe the rebuilt candidate; deletion
 alone does not prove recovery.
 
 ## Implementation modes
@@ -30,4 +30,4 @@ python3 scripts/lifecycle.py --mode destroy \
   --private-root "$CANADA_PRIVATE/destroy-receipts"
 ```
 
-`--mode full` combines build, destroy, direct absence and a second verified build. These modes use reviewed inputs in the authorized lab window. Documentation work does not invoke them or remove protected state/backups. [Staging reference](../deployment/) explains the independent backend and source identity.
+`--mode full` combines build, destroy, direct absence and a second verified build. These modes use reviewed inputs in the authorized lab window. Documentation work does not invoke them or remove protected state/backups. [Deploy the demo](../deployment/) explains the independent backend and source identity.

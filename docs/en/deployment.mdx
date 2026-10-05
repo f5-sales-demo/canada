@@ -1,11 +1,11 @@
 ---
-title: Demonstration staging
-description: Describe the Terraform phases and protected inputs used to stage the example
+title: Deploy the demo
+description: Stage the Canadian infrastructure with pinned artifacts, protected inputs, and reviewed Terraform plans.
 sidebar:
   order: 4
 ---
 
-Terraform stages the infrastructure supporting the [use case](../use-case/). This reference describes that process for readers inspecting the implementation; API examples remain in the article and the complete graph remains in [Terraform sources](../terraform/).
+Terraform stages the infrastructure behind the [Canadian traffic path](../use-case/). This page explains its phases and protected inputs; API examples remain in the article and the complete graph is in [Terraform source](../terraform/).
 
 ## Artifacts and inputs
 
@@ -23,7 +23,7 @@ clean merged commit and repository `f5-sales-demo/canada`.
 
 Bootstrap creates the owned Canadian infrastructure and registrations. The configured phase binds observed NIC MACs and approves those registrations. The deployed example has three CEs and its origin in Canada Central; Canada East is an allowed input rather than a deployed recovery region. Saved plans are reviewed for ownership and scope before application.
 
-The public listener uses tenant-managed DNS, the reserved RE allocation, and the selected country policy. The internal listener carries CE BGP, primary-IP and ILB diagnostics independently. Origin ingress uses infrastructure-source ACLs, separate from the public country policy. [Configuration mapping](../architecture/) locates each object in the source.
+The public listener uses tenant-managed DNS, the reserved RE allocation, and the selected country policy. The internal listener carries CE BGP, primary-IP and ILB diagnostics independently. Origin ingress uses infrastructure-source ACLs, separate from the public country policy. [Configuration map](../architecture/) locates each object in the source.
 
 ## Implementation commands
 
@@ -45,5 +45,5 @@ python3 scripts/lifecycle.py --mode build \
 ```
 
 The internal Site Console uses its separate ILB frontend and approved private client path. TCP reachability and valid console login are different observations; the lifecycle's
-routing check skips console login. Bastion is optional. The source keeps origin SSH disabled. [Test reference](../verification/) and [lifecycle boundaries](../teardown/) describe
+routing check skips console login. Bastion is optional. The source keeps origin SSH disabled. [Verification tools](../verification/) and [resource cleanup](../teardown/) describe
 the associated evidence and ownership.

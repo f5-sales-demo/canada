@@ -1,16 +1,16 @@
 ---
-title: Recovery behavior
-description: Understand the Canada Central CE and FRR node recovery exercise
+title: Failover exercise
+description: Exercise one Canada Central CE failure and one independent FRR relay failure, then verify recovery.
 sidebar:
   order: 7
 ---
 
-The demonstration exercises one owned CE failure and one independent FRR relay failure, restoring each node before the next exercise. All three CEs are deployed in Canada Central. This tests node withdrawal and recovery within that region; Canada East is an allowed source input, not a second deployed recovery region.
+This exercise stops and restores one owned CE and one independent FRR relay in sequence. All three CEs are deployed in Canada Central. It tests node withdrawal and recovery within that region; Canada East is an allowed source input, not a second deployed recovery region.
 
 A CE stop withdraws that node's paths. An FRR stop removes one relay next hop from the client route. Surviving routes carry the internal application path, while the public path still depends on the reserved RE allocation, country policy and Canadian origin pool. After restart, the expected six CE-to-FRR and four FRR-to-Route-Server sessions and both relay next hops return.
 
 The useful observations are route withdrawal, changed next hops, expected-origin traffic during the interruption, and restored sessions. Internal success alone does not establish
-public country authorization. Public success must be observed from an XC-classified Canadian source. The [article's checks](../use-case/#checking-the-controls) put these results
+public country authorization. Public success must be observed from an XC-classified Canadian source. The [traffic-path checks](../use-case/#checking-the-controls) put these results
 alongside the other controls.
 
 ## Supplied exercise

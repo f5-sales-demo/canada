@@ -1,18 +1,18 @@
 ---
-title: Test reference
-description: Understand which observations establish DNS, placement, authorization, identity and recovery
+title: Verification tools
+description: Use the supplied tools to gather evidence for placement, country-policy decisions, origin identity, and recovery.
 sidebar:
   order: 6
 ---
 
-The [article's test matrix](../use-case/#checking-the-controls) describes what each observation proves. The supplied tools collect configuration and traffic evidence for the staged demonstration; they do not turn a network location or a response code into country-classification evidence.
+The [Canadian traffic path test matrix](../use-case/#checking-the-controls) describes what each observation proves. These tools gather configuration and traffic evidence for the staged demonstration; a network location or response code alone does not establish country classification.
 
 | Tool | Evidence and boundary |
 | --- | --- |
 | `verify-canadian-public-re.py` | Allocation binding, RE/CE selectors, origin-pool reference, serving RE headers and exact origin response |
 | `verify-country-receipts.py` | A private receipt joining observed egress to XC source/classification and policy denial for plain and spoofed-header variants |
 | `verify-azure-routing.sh` | Internal routes, BGP session inventory and internal application paths |
-| `verify-azure-failover.sh` | Owned node withdrawal, surviving traffic and restored sessions; see [recovery scope](../failover/) |
+| `verify-azure-failover.sh` | Owned node withdrawal, surviving traffic and restored sessions; see [failover exercise](../failover/) |
 | `lifecycle.py --mode verify` | The staged deployment's combined checks and refresh-enabled zero-change readiness |
 
 The existing verifier uses repeated samples as an automation gate. Its sample count is a property of that implementation, not a guarantee of availability or geography. A classified
@@ -21,7 +21,7 @@ Supplied forwarding headers must leave the actual-source result unchanged.
 
 ## Supplied commands
 
-These commands read protected deployment state or private receipts. `CANADA_PRIVATE` names the deployment's protected evidence directory; [staging reference](../deployment/) describes its inputs.
+These commands read protected deployment state or private receipts. `CANADA_PRIVATE` names the deployment's protected evidence directory; [deployment guide](../deployment/) describes its inputs.
 
 ```bash
 python3 scripts/verify-canadian-public-re.py --terraform-dir terraform \
