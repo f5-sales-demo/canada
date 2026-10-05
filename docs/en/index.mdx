@@ -1,20 +1,20 @@
 ---
 title: Canada Topology
-description: Canadian sovereignty objectives for application hosting, regional delivery and source-country access
+description: Configure Canadian application delivery with regional entry points, origin discovery and source-country access
 sidebar:
   order: 1
 template: splash
 hero:
-  title: "Canadian sovereignty: hosting, delivery and access"
-  tagline: Explore how F5 Distributed Cloud supports Canadian hosting, regional application delivery and source-country access control.
+  title: "Configure application delivery in Canada"
+  tagline: See how an F5 Distributed Cloud tenant connects a Canadian origin, serves an application through Toronto and Montreal Regional Edges, and controls access by source country.
   image:
     file: ../assets/canada-flag.svg
     alt: Canadian flag with a red maple leaf on white between two red bands
   actions:
-    - text: Explore the showcase
+    - text: View the configuration
       link: ./use-case/
       icon: right-arrow
-    - text: Understand the evidence
+    - text: Run the checks
       link: ./verification/
       variant: secondary
 ---
@@ -29,41 +29,27 @@ import { Card, CardGrid } from "@astrojs/starlight/components";
   }
 `}</style>
 
-The Government of Canada's [digital sovereignty framework](https://www.canada.ca/en/government/system/digital-government/digital-government-innovations/cloud-services/digital-sovereignty/digital-sovereignty-framework-improve-digital-readiness.html)
-frames control, assurance and resilience as goals.
-[Federal guidance](https://www.canada.ca/en/government/system/digital-government/guideline-service-digital.html#ToC4_4)
-calls for evaluating Canadian computing facilities or specified government
-premises abroad as a principal delivery option for Protected B, Protected C
-and classified information; its residency rule concerns stored data, not transit.
-[Nova Scotia's law](https://nslegislature.ca/sites/default/files/legc/statutes/persinfo.htm)
-requires Canadian storage and access for public-body personal information,
-subject to section 5 exceptions.
-[British Columbia's Act](https://www.bclaws.gov.bc.ca/civix/document/id/complete/statreg/96165_03)
-regulates public-body disclosure of personal information outside Canada.
-
-This showcase demonstrates three configurable application controls that support those sovereignty objectives; it does not certify an application or establish complete sovereignty.
-
-## Showcase objectives
+## What the tenant configures
 
 <CardGrid>
   <Card title="Host the application in Canada">
-    Place the application origin in Canada and discover it through the owned Canadian Customer Edges. This objective demonstrates where the origin runs and how the application selects it for incoming requests.
+    Place the origin in Canada. The tenant's origin pool discovers it through owned Canadian Customer Edges, so accepted requests reach the intended application backend.
 
-    - [Explore Canadian origin configuration](./use-case/#origin-pool--canadian-origin)
-    - [Map the origin to configuration](./architecture/)
+    - [View the origin configuration](./use-case/#origin-pool--canadian-origin)
+    - [Map the origin settings](./architecture/)
   </Card>
   <Card title="Serve through Canadian Regional Edges">
-    Bind a reserved public allocation to Toronto and Montreal Regional Edges, then advertise the application listener through that allocation. This objective demonstrates the intended Canadian public entry points for the application.
+    Use the reserved public allocation to advertise the application from Toronto and Montreal Regional Edges. Check the allocation and serving edges to confirm where clients enter.
 
-    - [Explore regional advertisement](./use-case/#load-balancer--regional-advertisement)
-    - [Verify Regional Edge placement](./verification/)
+    - [View Regional Edge advertisement](./use-case/#load-balancer--regional-advertisement)
+    - [Check Regional Edge placement](./verification/)
   </Card>
   <Card title="Control access by source country">
-    Apply a policy to the actual client source: permit sources classified as Canadian and deny other or unknown classifications. This objective demonstrates country-based authorization without trusting a client-supplied forwarding header.
+    Apply a service policy to the actual client source address. Permit sources classified as Canadian and deny other or unknown classifications. Client-supplied forwarding headers don't change the result.
 
-    - [Explore client authorization](./use-case/#load-balancer--client-authorization)
-    - [Follow the proof sequence](./presentation/)
+    - [View the source-country policy](./use-case/#load-balancer--client-authorization)
+    - [See the traffic checks](./presentation/)
   </Card>
 </CardGrid>
 
-Canadian entry-point placement does not establish end-to-end domestic packet routing. Source-country classification does not establish a user's identity or physical location.
+These checks confirm the configured entry points, origin and source-country decision. They don't trace every packet between a client and Canada or identify the person behind a source IP address.
