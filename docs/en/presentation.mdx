@@ -1,11 +1,11 @@
 ---
-title: Proof sequence
-description: Read the sequence of observations used to explain the demonstrated controls
+title: Test sequence
+description: Pair each Canada configuration control with observations of placement, authorization, origin identity, and recovery.
 sidebar:
   order: 5
 ---
 
-The [use case](../use-case/) introduces the configuration in request order. Its proof sequence pairs configuration with observations so each result has a clear meaning.
+The [Canadian traffic path](../use-case/) introduces the configuration in request order. This sequence pairs each control with an observation so readers can explain what the result establishes.
 
 1. **Name and placement.** Resolve the application name to the retained allocation, then inspect the allocation binding and Toronto/Montreal selectees. DNS mapping and regional advertisement answer separate questions.
 2. **Allowed source.** Join the observed egress to an XC `CA` classification and a response matching the Canadian origin control body. A source's Azure region or VPN label is insufficient.
@@ -14,5 +14,5 @@ The [use case](../use-case/) introduces the configuration in request order. Its 
 5. **Recovery.** Observe routes and application traffic during an owned CE failure and an independent FRR failure, then observe restored sessions. This is the [Canada Central node exercise](../failover/).
 
 Each observation describes its tested path and time. Internal application or console reachability cannot establish public authorization, and public success cannot establish
-comprehensive residency or cross-region availability. The [test reference](../verification/) explains the evidence tools. Shared material uses sanitized outcomes; private events
+comprehensive residency or cross-region availability. The [verification tools](../verification/) explains the evidence tools. Shared material uses sanitized outcomes; private events
 and deployment inputs stay in protected storage.

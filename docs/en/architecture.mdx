@@ -1,11 +1,11 @@
 ---
-title: Configuration mapping
-description: Map the use-case controls to API objects and authoritative Terraform sources
+title: Configuration map
+description: Locate DNS, Regional Edge, country-policy, origin, and internal-path controls in the API and Terraform source.
 sidebar:
   order: 3
 ---
 
-The [primary article](../use-case/) explains the request path and API fields. This reference maps those controls to the demonstration's source.
+The [Canadian traffic path](../use-case/) follows a request through the public controls. This map locates those controls in the demonstration's Terraform source.
 
 | Control | Objects or fields | Terraform source |
 | --- | --- | --- |
@@ -19,4 +19,4 @@ The [primary article](../use-case/) explains the request path and API fields. Th
 
 The public listener references the reserved allocation only. A separate internal listener exposes diagnostic CE/ILB paths without public advertisement or managed public DNS. The internal client learns the application VIP through Azure Route Server and two FRR next hops. The expected routing inventory has six CE-to-FRR and four FRR-to-Route-Server sessions.
 
-The CE selector identifies owned sites; Azure placement establishes their region. Origin ingress ACLs govern infrastructure connections independently of the public country policy. [Recovery behavior](../failover/) explains the tested node scope, and [ownership and lifecycle](../teardown/) identifies retained platform resources.
+The CE selector identifies owned sites; Azure placement establishes their region. Origin ingress ACLs govern infrastructure connections independently of the public country policy. [Failover exercise](../failover/) explains the tested node scope, and [resource cleanup](../teardown/) identifies retained platform resources.

@@ -1,9 +1,11 @@
 ---
-title: Canadian hosting and regional access control
-description: Combine DNS, Canadian Regional Edge advertisement, source-country authorization and Canadian origin discovery
+title: Canadian traffic path
+description: Follow DNS, Canadian Regional Edge advertisement, actual-source authorization, and Canadian origin discovery.
 sidebar:
   order: 2
 ---
+
+Follow a request from tenant-managed DNS through a Canadian Regional Edge and the source-country policy to an origin discovered through Canadian Customer Edges. The controls are separate configuration decisions, and each has its own verification evidence.
 
 ## Purpose and design
 
@@ -232,7 +234,7 @@ Each observation establishes a different boundary. Record the source and configu
 | Origin identity | Public response matches the Canadian origin; pool/CE inventory and Azure placement agree | The tested application path uses the intended Canadian origin |
 | Node recovery | Owned CE and FRR node withdrawal changes routes; traffic uses surviving paths; sessions return after restart | The deployed Canada Central topology supports the exercised node recovery |
 
-A denial without a policy event could have another cause. A regional response header shows the serving RE for that request, while the selector inventory establishes the configured set. Read the [test reference](../verification/) for the supplied verification tools and the [recovery reference](../failover/) for the exercise's scope.
+A denial without a policy event could have another cause. A regional response header shows the serving RE for that request, while the selector inventory establishes the configured set. Use [verification tools](../verification/) for the supplied checks and the [failover exercise](../failover/) for the node scope.
 
 ## Adapting the pattern
 

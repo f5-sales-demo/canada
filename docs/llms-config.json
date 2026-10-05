@@ -1,7 +1,7 @@
 {
   "title": "Canada Topology",
   "description": "Configure Canadian application delivery with F5 Distributed Cloud: connect a Canadian origin, advertise Toronto and Montreal Regional Edges, and control access by source country.",
-  "promote": ["index", "use-case"],
+  "promote": ["index", "use-case", "design", "deploy", "verify", "operate"],
   "demote": [
     "architecture",
     "verification",
