@@ -31,12 +31,7 @@
   "checks": {
     "title_word_maximum": 3,
     "english_page_titles": 14,
-    "menu_groups": [
-      "Design",
-      "Deploy",
-      "Verify",
-      "Operate"
-    ],
+    "menu_groups": ["Design", "Deploy", "Verify", "Operate"],
     "mdx_prose_lint": "passed",
     "pii_enforce_and_audit": "passed",
     "pinned_builder_build": "passed",
@@ -45,21 +40,9 @@
     "local_link_errors": 0,
     "english_html_pages": 14,
     "english_llm_page_routes": 14,
-    "llm_priority": [
-      "use-case",
-      "design",
-      "deploy",
-      "verify",
-      "operate",
-      "index"
-    ],
+    "llm_priority": ["use-case", "design", "deploy", "verify", "operate", "index"],
     "llm_import_navigation": "excluded",
-    "visual_variants": [
-      "desktop-light",
-      "desktop-dark",
-      "mobile-light",
-      "mobile-dark"
-    ],
+    "visual_variants": ["desktop-light", "desktop-dark", "mobile-light", "mobile-dark"],
     "sidebar_navigation_and_disclosure": "passed",
     "sidebar_state_and_history": "passed",
     "keyboard_focus": "visible on native disclosure",
