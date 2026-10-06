@@ -31,35 +31,18 @@
   "checks": {
     "title_word_maximum": 3,
     "english_page_titles": 14,
-    "menu_groups": [
-      "Design",
-      "Deploy",
-      "Verify",
-      "Operate"
-    ],
+    "menu_groups": ["Design", "Deploy", "Verify", "Operate"],
     "mdx_prose_lint": "passed",
-    "pii_enforce_and_audit": "enforcement passed; unchanged full-source audit findings reviewed",
+    "pii_enforce_and_audit": "changed receipt enforcement passed; full-source baseline flags recorded",
     "pinned_builder_build": "passed",
     "imports_staged": 42,
     "local_links_and_anchors": 476,
     "local_link_errors": 0,
     "english_html_pages": 14,
     "english_llm_page_routes": 14,
-    "llm_priority": [
-      "use-case",
-      "design",
-      "deploy",
-      "verify",
-      "operate",
-      "index"
-    ],
+    "llm_priority": ["use-case", "design", "deploy", "verify", "operate", "index"],
     "llm_import_navigation": "excluded",
-    "visual_variants": [
-      "desktop-light",
-      "desktop-dark",
-      "mobile-light",
-      "mobile-dark"
-    ],
+    "visual_variants": ["desktop-light", "desktop-dark", "mobile-light", "mobile-dark"],
     "sidebar_navigation_and_disclosure": "passed",
     "sidebar_state_and_history": "desktop state persistence and desktop/mobile history passed",
     "keyboard_focus": "visible focus ring on native disclosure",
@@ -69,7 +52,8 @@
     "provider_version": "15.0.3",
     "api_version": "12.0.0",
     "pii_audit_findings": 12,
-    "pii_receipt_findings": 0
+    "pii_receipt_findings": 0,
+    "pii_source_enforcement_findings": 2
   },
   "infrastructure_changes": false,
   "content_issue": "f5-sales-demo/canada#53",
