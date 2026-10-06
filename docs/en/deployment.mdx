@@ -9,8 +9,8 @@ Terraform stages the infrastructure behind the [Canadian traffic path](../use-ca
 
 ## Artifacts and inputs
 
-The source pins Terraform 1.16.3 and signed xcsh 13.1.0 with API 10.0.1, contract 7.0.0 and telemetry v2. Its [provider
-release](https://github.com/f5-sales-demo/terraform-provider-xcsh/releases/tag/v13.1.0) and [API release](https://github.com/f5-sales-demo/api-specs-enriched/releases/tag/v10.0.1)
+The source pins Terraform 1.16.3 and signed xcsh 15.0.3 with API 12.0.0, contract 7.0.0 and telemetry v2. Its [provider
+release](https://github.com/f5-sales-demo/terraform-provider-xcsh/releases/tag/v15.0.3) and [API release](https://github.com/f5-sales-demo/api-specs-enriched/releases/tag/v12.0.0)
 provide immutable references. The verifier checks source identity, archive digest, signature and embedded API receipt; initialization preserves the committed lockfile.
 
 The demonstration uses the existing Azure CLI login and shared subscription Marketplace acceptance. The Canada application namespace and registration token are separately owned; CE sites stay in `system`, and the reserved allocation stays in its platform namespace. The deployment manages its selector binding.
