@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "date": "2026-10-06",
-  "status": "candidate-verified",
+  "status": "published-acceptance-passed",
   "scope": "Canada documentation after xcsh v15.0.3 upgrade",
-  "issue": "f5-sales-demo/canada#76",
+  "issue": "f5-sales-demo/canada#78",
   "source_sha256": {
     "docs/en/architecture.mdx": "50b34bc859095176f765ac62ffaac96bdc92547e77dbb5571aa362b314ff363d",
     "docs/en/deploy.mdx": "98253aac87a26c87ba53e41ab0d36108c5e5acb7bbec9e5445080c64f7b8399e",
@@ -57,6 +57,22 @@
   },
   "infrastructure_changes": false,
   "content_issue": "f5-sales-demo/canada#53",
-  "candidate_issue": "f5-sales-demo/canada#55",
-  "candidate_source_commit": "c80bf0db24509bad49a035a7c1e484fb8db4be03"
+  "candidate_issue": "f5-sales-demo/canada#76",
+  "candidate_source_commit": "c80bf0db24509bad49a035a7c1e484fb8db4be03",
+  "published_acceptance": {
+    "source_commit": "288b5df00767620199d303d487cade3d09fec947",
+    "pages_workflow": "https://github.com/f5-sales-demo/canada/actions/runs/37408711589",
+    "builder_image": "ghcr.io/f5-sales-demo/docs-builder@sha256:988e1fbf4e5acdbb15eb0c9aa6430f7968603d4fc96e713a28ca09846eedadd4",
+    "workflow_content_and_builder_identity": "verified in build and deploy logs",
+    "published_html_pages": 14,
+    "published_llm_page_routes": 14,
+    "published_receipt_matches_source": true,
+    "published_source_hashes_match": true,
+    "published_anchor_ids_match_builder": true,
+    "generated_files_matching_builder": 33,
+    "four_stage_sidebar_and_keyboard_history": "passed",
+    "visual_variants": ["desktop-light", "desktop-dark", "mobile-light", "mobile-dark"],
+    "browser_errors": [],
+    "failed_browser_responses": []
+  }
 }
