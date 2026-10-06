@@ -1,13 +1,13 @@
 {
   "schema_version": 2,
-  "date": "2026-10-04",
-  "status": "published-acceptance-passed",
-  "scope": "Short Canada titles and four-stage documentation menu",
-  "issue": "f5-sales-demo/canada#59",
+  "date": "2026-10-06",
+  "status": "candidate-verified",
+  "scope": "Canada documentation after xcsh v15.0.3 upgrade",
+  "issue": "f5-sales-demo/canada#76",
   "source_sha256": {
     "docs/en/architecture.mdx": "50b34bc859095176f765ac62ffaac96bdc92547e77dbb5571aa362b314ff363d",
     "docs/en/deploy.mdx": "98253aac87a26c87ba53e41ab0d36108c5e5acb7bbec9e5445080c64f7b8399e",
-    "docs/en/deployment.mdx": "43783a4ba5a6da85fac26a53c0ec3b69c4f5103178cdc159152dff3a9945c110",
+    "docs/en/deployment.mdx": "addcf68faa955273d9726c1a5930feb1697c93f41c22dc5911aec4c6af7c5caf",
     "docs/en/design.mdx": "4ef917528f3c34d9153115680caccb071dac879bd264d8adb414611ac24fcba2",
     "docs/en/failover.mdx": "5c789a28d802c5427de11c646097ba88095c26f62de2b4794094643136958063",
     "docs/en/index.mdx": "8b69188626c770cb6b9e6f946b8e710bed90c7400c34052c7fe08ddb1a200a72",
@@ -23,51 +23,56 @@
   },
   "editorial_reference": "https://learn.microsoft.com/en-us/style-guide/brand-voice-above-all-simple-human",
   "builder": {
-    "image": "ghcr.io/f5-sales-demo/docs-builder@sha256:0d4cd9510b18fbb9869877c5a5eedcc91f2463598e74cf246a0917bfdfc9eaac",
+    "image": "ghcr.io/f5-sales-demo/docs-builder@sha256:988e1fbf4e5acdbb15eb0c9aa6430f7968603d4fc96e713a28ca09846eedadd4",
     "builder_version": "1.4.2",
-    "builder_source_commit": "45ceb316d1abcee16dfda091f0135cbdf30d8731",
-    "theme_version": "4.9.0"
+    "builder_source_commit": "eb59d288fdde0a03fad001f23907bb856353c8d2",
+    "theme_version": "4.9.7"
   },
   "checks": {
     "title_word_maximum": 3,
     "english_page_titles": 14,
-    "menu_groups": ["Design", "Deploy", "Verify", "Operate"],
+    "menu_groups": [
+      "Design",
+      "Deploy",
+      "Verify",
+      "Operate"
+    ],
     "mdx_prose_lint": "passed",
-    "pii_enforce_and_audit": "passed",
+    "pii_enforce_and_audit": "enforcement passed; unchanged full-source audit findings reviewed",
     "pinned_builder_build": "passed",
     "imports_staged": 42,
     "local_links_and_anchors": 476,
     "local_link_errors": 0,
     "english_html_pages": 14,
     "english_llm_page_routes": 14,
-    "llm_priority": ["use-case", "design", "deploy", "verify", "operate", "index"],
+    "llm_priority": [
+      "use-case",
+      "design",
+      "deploy",
+      "verify",
+      "operate",
+      "index"
+    ],
     "llm_import_navigation": "excluded",
-    "visual_variants": ["desktop-light", "desktop-dark", "mobile-light", "mobile-dark"],
+    "visual_variants": [
+      "desktop-light",
+      "desktop-dark",
+      "mobile-light",
+      "mobile-dark"
+    ],
     "sidebar_navigation_and_disclosure": "passed",
-    "sidebar_state_and_history": "passed",
-    "keyboard_focus": "visible on native disclosure",
+    "sidebar_state_and_history": "desktop state persistence and desktop/mobile history passed",
+    "keyboard_focus": "visible focus ring on native disclosure",
     "flag_and_favicon": "loaded",
     "browser_errors": [],
-    "failed_browser_responses": []
+    "failed_browser_responses": [],
+    "provider_version": "15.0.3",
+    "api_version": "12.0.0",
+    "pii_audit_findings": 12,
+    "pii_receipt_findings": 0
   },
   "infrastructure_changes": false,
   "content_issue": "f5-sales-demo/canada#53",
   "candidate_issue": "f5-sales-demo/canada#55",
-  "published_acceptance": {
-    "content_commit": "cd5b4929b1c0bf420de588c43c14aa70b367bd0c",
-    "source_commit": "cb6cf94011e314a74ba8b90b557948f7f3769063",
-    "pages_workflow": "https://github.com/f5-sales-demo/canada/actions/runs/37260485427",
-    "builder_image": "ghcr.io/f5-sales-demo/docs-builder@sha256:0d4cd9510b18fbb9869877c5a5eedcc91f2463598e74cf246a0917bfdfc9eaac",
-    "workflow_content_and_builder_identity": "verified in build and deploy logs",
-    "published_html_pages": 14,
-    "published_llm_page_routes": 14,
-    "published_receipt_matches_source": true,
-    "published_source_hashes_match": true,
-    "published_anchor_ids_match_builder": true,
-    "generated_files_matching_builder": 33,
-    "four_stage_sidebar_and_keyboard_history": "passed",
-    "visual_variants": ["desktop-light", "desktop-dark", "mobile-light", "mobile-dark"],
-    "browser_errors": [],
-    "failed_browser_responses": []
-  }
+  "candidate_source_commit": "c80bf0db24509bad49a035a7c1e484fb8db4be03"
 }
